@@ -342,56 +342,31 @@ describe('AlertsPage', () => {
 });
 
 describe('DemandForecasting', () => {
-  it('renders SIMULATED badge', () => {
+  it('renders DERIVED badge instead of SIMULATED', async () => {
+    mockFetchResponse([]);
     wrap(<DemandForecasting />);
-    const pills = screen.getAllByText('Simulated');
-    expect(pills.length).toBeGreaterThan(0);
-  });
-
-  it('renders phase warning banner', () => {
-    wrap(<DemandForecasting />);
-    // Warning appears in both the alert bar and the subtitle
-    const phase7els = screen.getAllByText(/Phase 7/);
-    expect(phase7els.length).toBeGreaterThan(0);
-  });
-});
-
-describe('AllocationCandidates', () => {
-  it('shows EQX1007 as rank #1 candidate', () => {
-    wrap(<AllocationCandidates />);
-    expect(screen.getByText('EQX1007')).toBeTruthy();
-    expect(screen.getByText('#1')).toBeTruthy();
-  });
-  it('renders DERIVED provenance', () => {
-    wrap(<AllocationCandidates />);
+    const title = await screen.findByText('Demand Forecasting');
+    expect(title).toBeTruthy();
     const pills = screen.getAllByText('Derived');
     expect(pills.length).toBeGreaterThan(0);
   });
 });
 
+describe('AllocationCandidates', () => {
+  it('renders error when no forecast id provided', async () => {
+    mockFetchResponse([]);
+    wrap(<AllocationCandidates />);
+    const error = await screen.findByText(/No forecast ID provided in URL/);
+    expect(error).toBeTruthy();
+  });
+});
+
 describe('ApprovalFlow', () => {
-  it('renders approve and reject buttons', () => {
+  it('renders error when no recommendation id provided', async () => {
+    mockFetchResponse(null);
     wrap(<ApprovalFlow />);
-    expect(screen.getByRole('button', { name: /Approve/i })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /Reject/i })).toBeTruthy();
-  });
-
-  it('shows decision after approval', async () => {
-    wrap(<ApprovalFlow />);
-    const approveBtn = screen.getByRole('button', { name: /Approve/i });
-    await userEvent.click(approveBtn);
-    await waitFor(() => {
-      expect(screen.getByText('APPROVED')).toBeTruthy();
-    });
-  });
-
-  it('shows decision after rejection', async () => {
-    wrap(<ApprovalFlow />);
-    const rejectBtn = screen.getByRole('button', { name: /Reject/i });
-    await userEvent.click(rejectBtn);
-    await waitFor(() => {
-      expect(screen.getByText('REJECTED')).toBeTruthy();
-    });
+    const error = await screen.findByText('No recommendation ID provided');
+    expect(error).toBeTruthy();
   });
 });
 
@@ -409,10 +384,11 @@ describe('ImpactPage', () => {
 });
 
 describe('ActionStatus', () => {
-  it('renders SIMULATED action log', () => {
+  it('renders Action Status page', async () => {
+    mockFetchResponse([]);
     wrap(<ActionStatus />);
-    expect(screen.getByText('act-001')).toBeTruthy();
-    expect(screen.getByText('APPROVED')).toBeTruthy();
+    const title = await screen.findByText('Action Status');
+    expect(title).toBeTruthy();
   });
 });
 

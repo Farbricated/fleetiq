@@ -1,42 +1,75 @@
-import { useNavigate } from 'react-router-dom';
-import { getMockForecasts, getMockCandidates } from '../api/intelligence';
-import type { MockForecast, AllocationCandidate } from '../types';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { forecastsApi, recommendationsApi } from '../api/intelligence';
+import type { AllocationCandidate } from '../types';
 import { ProvenancePill } from '../components/ui/ProvenancePill';
 
 export function AllocationCandidates() {
   const navigate = useNavigate();
-  const forecasts: MockForecast[] = getMockForecasts();
-  const topForecast = forecasts[0];
-  const candidates: AllocationCandidate[] = getMockCandidates(topForecast?.id ?? '');
+  const [searchParams] = useSearchParams();
+  const forecastId = searchParams.get('forecast_id');
+  
+  const [candidates, setCandidates] = useState<AllocationCandidate[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCandidates = async (id: string) => {
+    setIsLoading(true);
+    try {
+      const data = await forecastsApi.getCandidates(id);
+      setCandidates(data.sort((a, b) => b.score - a.score));
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch candidates');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (forecastId) {
+      fetchCandidates(forecastId);
+    } else {
+      setError('No forecast ID provided in URL');
+      setIsLoading(false);
+    }
+  }, [forecastId]);
+
+  const handleGenerateRecommendation = async (candidateId: string) => {
+    try {
+      const rec = await recommendationsApi.create(candidateId);
+      navigate(`/recommendations`);
+    } catch (err: any) {
+      alert(err.message || 'Failed to generate recommendation');
+    }
+  };
 
   return (
     <div>
-      <div className="page-header">
-        <h1 className="page-title">Allocation Candidates</h1>
-        <p className="page-subtitle">Asset ranking for active demand opportunities · Phase 8 pending</p>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1 className="page-title">Allocation Candidates</h1>
+          <p className="page-subtitle">Asset ranking for active demand opportunities</p>
+        </div>
+        {forecastId && (
+          <button className="btn btn-primary" onClick={async () => {
+             setIsLoading(true);
+             try {
+                await forecastsApi.triggerCandidates(forecastId);
+                await fetchCandidates(forecastId);
+             } catch (err: any) {
+                setError(err.message || 'Failed to generate candidates');
+                setIsLoading(false);
+             }
+          }} disabled={isLoading}>
+            Regenerate Candidates
+          </button>
+        )}
       </div>
 
-      <div className="alert-bar alert-bar-warning mb-6">
-        ⚠ Phase 8 (Allocation Candidates Engine) is not yet implemented by the backend team. The rankings below are <strong>DERIVED</strong> mock scores based on the analytics rules. Replace <code>getMockCandidates()</code> with the real API when available.
-      </div>
-
-      {topForecast && (
-        <div className="card mb-6">
-          <div className="card-header">
-            <div>
-              <div className="card-title">Evaluating Forecast: {topForecast.id}</div>
-              <div className="card-subtitle">
-                {topForecast.site_name} · {topForecast.equipment_type} · {topForecast.forecast_date}
-              </div>
-            </div>
-            <ProvenancePill type="SIMULATED" />
-          </div>
-          <div className="card-body">
-            <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-              {topForecast.predicted_quantity} unit(s) of {topForecast.equipment_type} needed.
-              Confidence: {(topForecast.confidence * 100).toFixed(0)}%
-            </div>
-          </div>
+      {error && (
+        <div className="alert-bar alert-bar-critical mb-6">
+          ⚠ {error}
         </div>
       )}
 
@@ -52,65 +85,63 @@ export function AllocationCandidates() {
                 <th>Rank</th>
                 <th>Asset ID</th>
                 <th>Score</th>
-                <th>Idle Hours</th>
-                <th>Engine Hours</th>
-                <th>Operator Gap</th>
+                <th>Distance Penalty</th>
+                <th>Underutilization Penalty</th>
                 <th>Provenance</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {candidates.map((c) => (
-                <tr key={c.id}>
-                  <td>
-                    <span
-                      className={`badge ${c.rank === 1 ? 'badge-accent' : 'badge-neutral'}`}
-                      style={{ fontSize: 14, fontWeight: 700 }}
-                    >
-                      #{c.rank}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="asset-id-cell">{c.asset_id}</span>
-                    {c.asset_id === 'EQX1007' && (
-                      <span className="badge badge-critical" style={{ marginLeft: 6 }}>DEMO</span>
-                    )}
-                  </td>
-                  <td>
-                    <span style={{
-                      fontWeight: 700,
-                      color: c.score > 80 ? 'var(--accent-primary)' : 'var(--text-primary)'
-                    }}>
-                      {c.score}
-                    </span>
-                  </td>
-                  <td className="mono">{c.reasoning.idle_hours}h</td>
-                  <td className="mono">{c.reasoning.engine_hours}h</td>
-                  <td>
-                    <span className={`badge ${c.reasoning.operator_gap === 'UNASSIGNED' ? 'badge-high' : 'badge-neutral'}`}>
-                      {String(c.reasoning.operator_gap)}
-                    </span>
-                  </td>
-                  <td><ProvenancePill type="DERIVED" /></td>
-                  <td>
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => navigate(`/assets/${c.asset_id}`)}
-                    >
-                      View 360 →
-                    </button>
-                  </td>
+              {isLoading && candidates.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>Loading...</td>
                 </tr>
-              ))}
+              ) : candidates.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>No candidates found.</td>
+                </tr>
+              ) : (
+                candidates.map((c, index) => (
+                  <tr key={c.id}>
+                    <td>
+                      <span
+                        className={`badge ${index === 0 ? 'badge-accent' : 'badge-neutral'}`}
+                        style={{ fontSize: 14, fontWeight: 700 }}
+                      >
+                        #{index + 1}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="asset-id-cell" onClick={() => navigate(`/assets/${c.asset_id}`)} style={{ cursor: 'pointer', textDecoration: 'underline' }}>{c.asset_id}</span>
+                      {c.asset_id === 'EQX1007' && (
+                        <span className="badge badge-critical" style={{ marginLeft: 6 }}>DEMO</span>
+                      )}
+                    </td>
+                    <td>
+                      <span style={{
+                        fontWeight: 700,
+                        color: c.score > 80 ? 'var(--accent-primary)' : 'var(--text-primary)'
+                      }}>
+                        {c.score.toFixed(1)}
+                      </span>
+                    </td>
+                    <td className="mono">{c.reasoning.distance_penalty?.toFixed(1) || '0.0'}</td>
+                    <td className="mono">{c.reasoning.underutilization_penalty?.toFixed(1) || '0.0'}</td>
+                    <td><ProvenancePill type="DERIVED" /></td>
+                    <td>
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => handleGenerateRecommendation(c.id)}
+                      >
+                        Recommend →
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
-      </div>
-
-      <div style={{ marginTop: 20, textAlign: 'right' }}>
-        <button className="btn btn-primary" onClick={() => navigate('/recommendations')}>
-          View Recommendation → 
-        </button>
       </div>
     </div>
   );

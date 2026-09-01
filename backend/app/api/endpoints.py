@@ -271,11 +271,6 @@ from app.services.recommendation import create_recommendation, process_action
 import app.core.scoring_config as config
 from app.models.all import AllocationCandidate, Recommendation, ImpactRecord
 
-@router.post("/forecasts/mock", response_model=ForecastResponse)
-def create_mock_forecast(site_id: str = "S003", equipment_category_name: str = "Excavators", db: Session = Depends(get_db)):
-    """SIMULATED endpoint for Phase 7 mock generation"""
-    forecast = ensure_simulated_forecast(db, site_id, equipment_category_name)
-    return forecast
 
 @router.post("/forecasts/{forecast_id}/candidates", response_model=List[AllocationCandidateResponse])
 def trigger_candidate_generation(forecast_id: UUID, db: Session = Depends(get_db)):
@@ -372,15 +367,6 @@ def get_alert(alert_id: uuid.UUID, db: Session = Depends(get_db)):
     return alert
 
 
-@router.get("/recommendations", response_model=List[RecommendationResponse])
-def get_recommendations(db: Session = Depends(get_db)):
-    return db.query(Recommendation).all()
-
-@router.get("/recommendations/{recommendation_id}", response_model=RecommendationResponse)
-def get_recommendation(recommendation_id: uuid.UUID, db: Session = Depends(get_db)):
-    rec = db.query(Recommendation).filter(Recommendation.id == recommendation_id).first()
-    if not rec: raise HTTPException(status_code=404, detail="Recommendation not found")
-    return rec
 
 @router.get("/assets/{asset_id}/analytics", response_model=AnalyticsResult)
 def get_asset_analytics(asset_id: str, db: Session = Depends(get_db)):

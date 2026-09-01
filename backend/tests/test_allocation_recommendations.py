@@ -35,10 +35,15 @@ def test_signature_workflow():
         db.query(AssetOperatorAssignment).filter(AssetOperatorAssignment.asset_id == "EQX1001").delete()
         db.commit()
         
-    # 1. Generate Mock Forecast for S003 (Excavators)
-    forecast_resp = client.post("/forecasts/mock?site_id=S003&equipment_category_name=Excavators")
-    assert forecast_resp.status_code == 200
-    forecast = forecast_resp.json()
+    # 1. Generate Real Forecasts
+    gen_resp = client.post("/forecasts/generate?horizon_weeks=4&lookback_weeks=4")
+    assert gen_resp.status_code == 200
+
+    # Get forecasts to find one to use (e.g. S003)
+    forecasts_resp = client.get("/forecasts")
+    assert forecasts_resp.status_code == 200
+    forecasts = forecasts_resp.json()
+    forecast = next((f for f in forecasts if f["site_id"] == "S003"), forecasts[0])
     forecast_id = forecast["id"]
     
     # 2. Trigger Candidate Generation
@@ -103,8 +108,10 @@ def test_invalid_transitions():
         db.query(AssetOperatorAssignment).filter(AssetOperatorAssignment.asset_id == "EQX1001").delete()
         db.commit()
 
-    forecast_resp = client.post("/forecasts/mock?site_id=S004&equipment_category_name=Excavators")
-    forecast_id = forecast_resp.json()["id"]
+    client.post("/forecasts/generate?horizon_weeks=4&lookback_weeks=4")
+    forecasts = client.get("/forecasts").json()
+    forecast = next((f for f in forecasts if f["site_id"] == "S004"), forecasts[0])
+    forecast_id = forecast["id"]
     client.post(f"/forecasts/{forecast_id}/candidates")
     candidates = client.get(f"/forecasts/{forecast_id}/candidates").json()
     candidate_id = candidates[0]["id"]

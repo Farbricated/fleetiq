@@ -138,6 +138,8 @@ export interface Forecast {
   site_id: string;
   forecast_date: string;
   predicted_quantity: number | null;
+  confidence?: number;
+  equipment_type_name?: string;
 }
 
 export interface Recommendation {
@@ -167,7 +169,7 @@ export interface AllocationCandidate {
   asset_id: string;
   score: number;
   rank: number;
-  reasoning: Record<string, string | number>;
+  reasoning: Record<string, any>;
   provenance: 'DERIVED';
 }
 

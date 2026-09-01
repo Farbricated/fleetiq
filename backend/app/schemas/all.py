@@ -100,14 +100,7 @@ class ForecastResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class RecommendationResponse(BaseModel):
-    id: UUID
-    action_type: Optional[str] = None
-    confidence: Optional[float] = None
-    status: Optional[str] = None
 
-    class Config:
-        from_attributes = True
 
 class DashboardSummary(BaseModel):
     total_assets: int

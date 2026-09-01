@@ -1,22 +1,60 @@
 import { useNavigate } from 'react-router-dom';
-import { getMockForecasts } from '../api/intelligence';
-import type { MockForecast } from '../types';
+import { useState, useEffect } from 'react';
+import { forecastsApi } from '../api/intelligence';
+import type { Forecast } from '../types';
 import { ProvenancePill } from '../components/ui/ProvenancePill';
 
 export function DemandForecasting() {
   const navigate = useNavigate();
-  const forecasts: MockForecast[] = getMockForecasts();
+  const [forecasts, setForecasts] = useState<Forecast[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchForecasts = async () => {
+    setIsLoading(true);
+    try {
+      const data = await forecastsApi.getAll();
+      setForecasts(data);
+      setError(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch forecasts');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchForecasts();
+  }, []);
+
+  const handleGenerate = async () => {
+    setIsLoading(true);
+    try {
+      await forecastsApi.generate();
+      await fetchForecasts();
+    } catch (err: any) {
+      setError(err.message || 'Failed to generate forecasts');
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div>
-      <div className="page-header">
-        <h1 className="page-title">Demand Forecasting</h1>
-        <p className="page-subtitle">Future equipment demand predictions · Phase 7 pending</p>
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1 className="page-title">Demand Forecasting</h1>
+          <p className="page-subtitle">Future equipment demand predictions</p>
+        </div>
+        <button className="btn btn-primary" onClick={handleGenerate} disabled={isLoading}>
+          {isLoading ? 'Generating...' : 'Generate New Forecasts'}
+        </button>
       </div>
 
-      <div className="alert-bar alert-bar-warning mb-6">
-        ⚠ Phase 7 (ML demand forecasting) is not yet implemented by the backend team. The data below is <strong>SIMULATED</strong> to demonstrate the UI contract. When Phase 7 lands, replace <code>getMockForecasts()</code> in <code>src/api/intelligence.ts</code> with the real <code>/forecasts</code> endpoint.
-      </div>
+      {error && (
+        <div className="alert-bar alert-bar-critical mb-6">
+          ⚠ {error}
+        </div>
+      )}
 
       <div className="card">
         <div className="card-header">
@@ -24,13 +62,13 @@ export function DemandForecasting() {
             <div className="card-title">Forecast Queue</div>
             <div className="card-subtitle">{forecasts.length} demand events predicted</div>
           </div>
-          <ProvenancePill type="SIMULATED" />
+          <ProvenancePill type="DERIVED" />
         </div>
         <div className="data-table-wrapper">
           <table className="data-table">
             <thead>
               <tr>
-                <th>Site</th>
+                <th>Site ID</th>
                 <th>Equipment Type</th>
                 <th>Forecast Date</th>
                 <th>Qty Needed</th>
@@ -40,38 +78,40 @@ export function DemandForecasting() {
               </tr>
             </thead>
             <tbody>
-              {forecasts.map((f) => (
-                <tr key={f.id}>
-                  <td className="mono">{f.site_id}</td>
-                  <td>{f.site_name}</td>
-                  <td className="mono">{f.forecast_date}</td>
-                  <td>{f.predicted_quantity}</td>
-                  <td>
-                    <span style={{ color: f.confidence > 0.75 ? 'var(--color-low)' : 'var(--color-medium)' }}>
-                      {(f.confidence * 100).toFixed(0)}%
-                    </span>
-                  </td>
-                  <td><ProvenancePill type="SIMULATED" /></td>
-                  <td>
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => navigate('/candidates')}
-                    >
-                      Find Candidates →
-                    </button>
-                  </td>
+              {isLoading && forecasts.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>Loading...</td>
                 </tr>
-              ))}
+              ) : forecasts.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>No forecasts found. Generate some.</td>
+                </tr>
+              ) : (
+                forecasts.map((f) => (
+                  <tr key={f.id}>
+                    <td className="mono">{f.site_id}</td>
+                    <td>{f.equipment_type_name || 'N/A'}</td>
+                    <td className="mono">{f.forecast_date}</td>
+                    <td>{f.predicted_quantity}</td>
+                    <td>
+                      <span style={{ color: (f.confidence || 0) > 0.75 ? 'var(--color-low)' : 'var(--color-medium)' }}>
+                        {((f.confidence || 0) * 100).toFixed(0)}%
+                      </span>
+                    </td>
+                    <td><ProvenancePill type="DERIVED" /></td>
+                    <td>
+                      <button
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => navigate(`/candidates?forecast_id=${f.id}`)}
+                      >
+                        Find Candidates →
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      <div style={{ marginTop: 20, padding: 16, background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-          <strong style={{ color: 'var(--provenance-simulated)' }}>SIMULATED</strong> — These forecast values are illustrative mock data generated in <code>src/api/intelligence.ts</code>.
-          They are NOT derived from real operational data or trained ML models. They exist solely to demonstrate the UI contract
-          for Phase 7. The backend implementation will replace this with real demand signal analysis.
         </div>
       </div>
     </div>
