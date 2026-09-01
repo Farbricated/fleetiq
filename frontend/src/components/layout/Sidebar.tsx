@@ -2,26 +2,30 @@ import { NavLink, useLocation } from 'react-router-dom';
 
 const NAV_SECTIONS = [
   {
-    label: '🎯 DEMO STORY',
+    label: 'Overview',
     items: [
       { path: '/', label: 'Fleet Command Center', icon: '⚡' },
-      { path: '/assets', label: 'Asset Dashboard', icon: '🏗', beat: 'SPOT' },
-      { path: '/assets/EQX1007', label: 'Asset 360 (EQX)', icon: '🔎', beat: 'EXPLAIN' },
-      { path: '/approvals', label: 'Approval / Rejection', icon: '✅', beat: 'ACT' },
-      { path: '/forecasting', label: 'Demand Forecasting', icon: '🔮', beat: 'PREDICT' },
-      { path: '/impact', label: 'Impact', icon: '📈', beat: 'PROVE' },
+      { path: '/assets', label: 'Asset Dashboard', icon: '🏗' },
     ],
   },
   {
-    label: '⚙ SYSTEM',
+    label: 'Intelligence',
     items: [
       { path: '/alerts', label: 'Alerts', icon: '🔔' },
       { path: '/utilization', label: 'Utilization Analytics', icon: '📊' },
       { path: '/risk', label: 'Risk Dashboard', icon: '🛡' },
+      { path: '/forecasting', label: 'Demand Forecasting', icon: '🔮' },
+    ],
+  },
+  {
+    label: 'Operations',
+    items: [
       { path: '/candidates', label: 'Allocation Candidates', icon: '🎯' },
       { path: '/recommendations', label: 'Recommendations', icon: '💡' },
+      { path: '/approvals', label: 'Approvals', icon: '✅' },
       { path: '/rentals', label: 'Rental Workflow', icon: '📋' },
       { path: '/actions', label: 'Action Status', icon: '⚙' },
+      { path: '/impact', label: 'Impact', icon: '📈' },
     ],
   },
 ];
@@ -61,13 +65,8 @@ export function Sidebar({ apiOnline }: SidebarProps) {
                 className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
                 aria-current={isActive ? 'page' : undefined}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                  <div>
-                    <span className="nav-icon">{item.icon}</span>
-                    {item.label}
-                  </div>
-                  {item.beat && <span className="beat-badge">{item.beat}</span>}
-                </div>
+                <span className="nav-icon">{item.icon}</span>
+                {item.label}
               </NavLink>
             );
           })}

@@ -56,35 +56,6 @@ export function DemandForecasting() {
         </div>
       )}
 
-      {/* PREDICT beat: What-If Simulation stub */}
-      <div className="card mb-6" style={{ border: '1px solid rgba(0,212,170,0.3)' }}>
-        <div className="card-header">
-          <div>
-            <div className="card-title">🔮 What-If Simulation</div>
-            <div className="card-subtitle">Scenario: Redeploy EQX1007 to Site SITE_CONST → estimated impact</div>
-          </div>
-          <span style={{ fontSize: 10, color: 'var(--text-muted)', background: 'var(--bg-elevated)', padding: '4px 8px', borderRadius: 4 }}>
-            ILLUSTRATIVE ESTIMATE
-          </span>
-        </div>
-        <div className="card-body">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-            {[
-              { label: 'Demand Gap Closed', value: '1 unit', color: 'var(--color-low)' },
-              { label: 'Idle Hours Eliminated', value: '12 hrs/day', color: 'var(--accent-primary)' },
-              { label: 'Est. Monthly Saving', value: '~$4,200', color: 'var(--accent-primary)' },
-            ].map(({ label, value, color }) => (
-              <div key={label} style={{ background: 'var(--bg-elevated)', borderRadius: 8, padding: 16, textAlign: 'center' }}>
-                <div style={{ fontSize: 22, fontWeight: 700, color }}>{value}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{label}</div>
-              </div>
-            ))}
-          </div>
-          <div style={{ marginTop: 12, fontSize: 11, color: 'var(--text-muted)' }}>
-            * Estimated from Weighted Moving Average forecast and idle-cost model. Labeled ILLUSTRATIVE ESTIMATE per provenance policy.
-          </div>
-        </div>
-      </div>
 
       <div className="card">
         <div className="card-header">

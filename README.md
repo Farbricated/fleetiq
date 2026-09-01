@@ -1,26 +1,35 @@
 # FleetIQ
 
-**Caterpillar Smart Rental Tracking Hackathon — Demo Edition**
+**Fleet Decision Intelligence — Fleet Analytics & Allocation Platform**
 
 [![Backend](https://img.shields.io/badge/Backend-FastAPI%20%2B%20PostgreSQL-009688)](backend/)
 [![Frontend](https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript%20%2B%20Vite-blue)](frontend/)
 [![Build](https://img.shields.io/badge/Build-Passing-brightgreen)](#)
+[![Tests](https://img.shields.io/badge/Tests-17%2F17-brightgreen)](#)
 
 ## Overview
 
-FleetIQ is an intelligent rental tracking and asset analytics platform for the Caterpillar Smart Rental Tracking Hackathon. It converts raw operational telemetry into a **5-beat demo story**: SPOT an idle asset → EXPLAIN why it's a problem → ACT on an AI recommendation → PREDICT future demand → PROVE the impact.
+FleetIQ is an intelligent fleet analytics and asset allocation platform. It converts raw operational telemetry into actionable decisions — identifying underutilized assets, scoring risk, generating demand forecasts, and managing the full approval-to-action workflow.
 
-**Signature asset: EQX1007** — 0 engine hours, 12 idle hours/day, no site, no operator.
+**Architecture:** Python/FastAPI backend · PostgreSQL · React/TypeScript frontend · Rule-based analytics engine
 
-## The 5-Beat Demo Story
+## Key Features
 
-| Beat | What You See | Where |
+| Module | Description | Route |
 |---|---|---|
-| 01 **SPOT** | EQX1007 highlighted ⚠ IDLE in the dashboard | `/assets` |
-| 02 **EXPLAIN** | Asset 360: utilization score, risk reasons, AI natural-language insight | `/assets/EQX1007` |
-| 03 **ACT** | Manager approves redeployment — state confirms instantly, no reload | `/approvals` |
-| 04 **PREDICT** | WMA demand forecast + What-If simulation (ILLUSTRATIVE ESTIMATE) | `/forecasting` |
-| 05 **PROVE** | Before/after impact record tied to the action | `/impact` |
+| **Fleet Command Center** | Real-time KPI dashboard — total assets, idle count, avg utilization, risk score | `/` |
+| **Asset Dashboard** | Full asset inventory with status filter and search | `/assets` |
+| **Asset 360** | Per-asset deep-dive: utilization %, risk score, NL insight, telemetry | `/assets/:id` |
+| **Alerts** | Overdue and underutilization alerts ranked by severity | `/alerts` |
+| **Utilization Analytics** | Idle vs active breakdown by asset | `/utilization` |
+| **Risk Dashboard** | Risk scores sorted by severity, filterable | `/risk` |
+| **Demand Forecasting** | Weighted Moving Average (WMA) demand forecasts by site | `/forecasting` |
+| **Allocation Candidates** | Assets eligible for redeployment against a forecast demand | `/candidates` |
+| **Recommendations** | AI-generated redeployment recommendations | `/recommendations` |
+| **Approvals** | Manager approval / rejection workflow | `/approvals` |
+| **Action Status** | Track status of approved actions | `/actions` |
+| **Impact** | Business outcome estimates for completed actions | `/impact` |
+| **Rental Workflow** | End-to-end rental lifecycle management | `/rentals` |
 
 ## Architecture
 

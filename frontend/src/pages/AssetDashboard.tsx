@@ -96,20 +96,9 @@ export function AssetDashboard() {
                       className="clickable"
                       onClick={() => navigate(`/assets/${a.id}`)}
                       data-testid={`asset-row-${a.id}`}
-                      style={a.id === 'EQX1007' ? {
-                        background: 'rgba(239,68,68,0.1)',
-                        borderLeft: '3px solid var(--color-critical)',
-                        position: 'relative',
-                      } : undefined}
                     >
                       <td>
-                        <span className="asset-id-cell" style={a.id === 'EQX1007' ? { fontWeight: 700, color: 'var(--color-critical)' } : undefined}>{a.id}</span>
-                        {a.id === 'EQX1007' && (
-                          <>
-                            <span className="badge badge-critical" style={{ marginLeft: 8 }}>⚠ IDLE</span>
-                            <span className="badge" style={{ marginLeft: 4, background: 'rgba(239,68,68,0.15)', color: 'var(--color-critical)', fontSize: 9 }}>0 ENGINE HRS</span>
-                          </>
-                        )}
+                        <span className="asset-id-cell">{a.id}</span>
                       </td>
                       <td><AssetStatusBadge status={a.status} /></td>
                       <td className="text-muted mono" style={{ fontSize: 11 }}>
@@ -125,7 +114,6 @@ export function AssetDashboard() {
                             e.stopPropagation();
                             navigate(`/assets/${a.id}`);
                           }}
-                          style={a.id === 'EQX1007' ? { borderColor: 'var(--color-critical)', color: 'var(--color-critical)' } : undefined}
                         >
                           Asset 360 →
                         </button>

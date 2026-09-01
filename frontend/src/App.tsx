@@ -44,12 +44,14 @@ function App() {
               <Route path="/recommendations" element={<RecommendationsPage />} />
               <Route path="/approvals" element={<ApprovalFlow />} />
               <Route path="/actions" element={<ActionStatus />} />
+              <Route path="/impact" element={<ImpactPage />} />
               <Route path="/impact/:recommendationId" element={<ImpactPage />} />
               <Route path="/rentals" element={<RentalWorkflow />} />
               <Route path="*" element={
-                <div className="state-container">
-                  <div className="state-icon">404</div>
-                  <div className="state-title">Page not found</div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
+                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>404</div>
+                  <h2>Page not found</h2>
+                  <p>The requested page doesn't exist or you don't have access.</p>
                 </div>
               } />
             </Routes>

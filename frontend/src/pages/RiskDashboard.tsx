@@ -130,9 +130,6 @@ export function RiskDashboard() {
                 >
                   <td>
                     <span className="asset-id-cell">{asset.id}</span>
-                    {asset.id === 'EQX1007' && (
-                      <span className="badge badge-critical" style={{ marginLeft: 6 }}>DEMO</span>
-                    )}
                   </td>
                   <td>
                     {risk.risk_level === 'CRITICAL' && <span className="pulse-dot"></span>}

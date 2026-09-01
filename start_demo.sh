@@ -42,7 +42,7 @@ echo '[API] Starting FastAPI on port 8000...'
 export DATABASE_URL=postgresql://postgres@127.0.0.1/fleetiq
 ./venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 >> /tmp/api_demo.log 2>&1 &
 APIPID=$!
-sleep 3
+sleep 10
 
 # Verify API
 if curl -sf http://localhost:8000/health >/dev/null 2>&1; then
@@ -60,3 +60,5 @@ echo ' Backend:  http://localhost:8000'
 echo ' API docs: http://localhost:8000/docs'
 echo ' Logs:     /tmp/api_demo.log  /tmp/pg_demo.log'
 echo '==================================================='
+echo 'Press Ctrl+C to stop the backend server.'
+tail -f /tmp/api_demo.log
