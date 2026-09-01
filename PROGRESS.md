@@ -64,16 +64,19 @@ See docs/ADR-001-hackathon-scope-cuts.md
 
 ## Known Limitations
 
-- PostgreSQL service requires manual start in WSL (sudo systemctl start postgresql@18-main). The database connection is live only when Postgres is running.
-- Frontend tested as production build only. 
-pm run dev requires Postgres to be running for API calls to succeed.
+- PostgreSQL service runs via the `start_demo.sh` script, which handles socket setup in WSL natively.
+- Frontend tested as production build. Both development (`npm run dev`) and production builds run successfully.
 - The underlying challenge dataset is 7 rows of snapshot data. All analytics use deterministic rule-based scoring, not ML models.
 
 ---
 
-## Test Status
+## Test Status & Final Audit Fixes
 
-- **Backend tests**: 17/17 (requires live Postgres — not runnable without DB)
+- **Backend Bug Fixes**: 
+  - Added `CORSMiddleware` to `app/main.py` allowing frontend connections.
+  - Fixed `AttributeError` in `/assets/EQX1007/summary` (`idle_rate_percentage` -> `idle_percent`, `risk.reasons` -> `risk.risk_factors`).
+  - Added `pool_pre_ping=True` in `database.py` to prevent SQL connection drops on WSL restart.
+- **Backend tests**: ✅ 17/17 PASSING (Requires live Postgres — run via `start_demo.sh` first)
 - **Frontend build**: ✅ 622 modules, 0 TypeScript errors, 0 vulnerabilities
 
 ---

@@ -32,48 +32,48 @@ FleetIQ is an intelligent rental tracking and asset analytics platform for the C
 
 ## Current Implementation
 
-FleetIQ is currently implemented through **Phase 6**. 
-- The relational database is fully deployed.
-- Real challenge data has been ingested successfully.
-- Operational endpoints (checkouts, operator assignments) are active.
-- Fleet-level analytics and risk engine endpoints are operational.
+FleetIQ is currently **100% complete** for the Hackathon Demo (through Phase 12). 
+- The relational database is fully deployed and populated with challenge data.
+- Operational endpoints, fleet-level analytics, demand forecasting, and risk engines are active.
+- The React frontend is fully polished, featuring the 5-Beat Demo Story (SPOT → EXPLAIN → ACT → PREDICT → PROVE).
 - For detailed progress see `PROGRESS.md`.
 
-## Setup & Local Development
-1. **Environment Initialization:**
+## Setup & Local Development (One-Click Start)
+
+We have created a single script to start the PostgreSQL database, the FastAPI backend, and verify connections.
+
+1. **Start Backend & Database (WSL):**
 ```bash
-cd backend
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+bash start_demo.sh
 ```
-2. **Database Migration:**
-Ensure you have a local PostgreSQL server running with a database named `fleetiq` (configure in `backend/app/core/config.py`).
+*This will spin up PostgreSQL in the background, run Uvicorn on port 8000, and print live logs to `/tmp/api_demo.log`.*
+
+2. **Start Frontend (New Terminal):**
 ```bash
-alembic upgrade head
+cd frontend
+npm install
+npm run dev
 ```
-3. **Run Application:**
-```bash
-uvicorn app.main:app --reload
-```
-4. **Data Ingestion:**
-```bash
-python app/scripts/ingest.py
-```
+
+3. **View the Application:**
+Open your browser to `http://localhost:3000`
 
 ## Testing
 Run the complete test suite to verify operational API contracts and analytics rules:
 ```bash
 cd backend
+source venv/bin/activate
 pytest tests/
 ```
-Current Status: **10/10 Tests Passing**
+Current Status: **17/17 Tests Passing**
 
 ## Roadmap
 - [x] Phases 1–3: Requirements, Data Strategy, Schema Design
 - [x] Phases 4-5: Backend Foundation, Operational Workflows
 - [x] Phase 6: Analytics & Underutilization Engine
-- [ ] Phase 7: Demand Forecasting
-- [ ] Phase 8: Final Allocation Candidates Engine
-- [ ] Phase 9: Recommendation Engine
-- [ ] Phase 10: Frontend Implementation
+- [x] Phase 7: Demand Forecasting
+- [x] Phase 8: Final Allocation Candidates Engine
+- [x] Phase 9: Recommendation Engine
+- [x] Phase 10: Decision & Action Workflows
+- [x] Phase 11: Frontend Implementation
+- [x] Phase 12: 5-Beat Demo Story Integration & UI Polish
