@@ -181,6 +181,14 @@ class AllocationCandidate(Base):
     score = Column(Float)
     reasoning = Column(JSONB)
 
+    @property
+    def target_site_id(self):
+        return self.reasoning.get("target_site_id") if self.reasoning else None
+
+    @property
+    def asset_equipment_type_id(self):
+        return self.reasoning.get("asset_equipment_type_id") if self.reasoning else None
+
 class Recommendation(Base):
     __tablename__ = "recommendations"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -195,6 +203,9 @@ class RecommendationAction(Base):
     recommendation_id = Column(UUID(as_uuid=True), ForeignKey("recommendations.id"))
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     action = Column(String(50))
+    previous_status = Column(String(50), nullable=True)
+    new_status = Column(String(50), nullable=True)
+    notes = Column(Text, nullable=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
 class ImpactRecord(Base):

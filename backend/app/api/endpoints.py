@@ -264,6 +264,103 @@ def check_underutilization(db: Session = Depends(get_db)):
     db.commit()
     return {"status": "ok", "alerts_created": alerts_created}
 
+# --- PHASE 8, 9, 10 ENDPOINTS ---
+from app.services.forecasting_adapter import ensure_simulated_forecast
+from app.services.allocation import generate_allocation_candidates, get_candidates_for_forecast
+from app.services.recommendation import create_recommendation, process_action
+import app.core.scoring_config as config
+from app.models.all import AllocationCandidate, Recommendation, ImpactRecord
+
+@router.post("/forecasts/mock", response_model=ForecastResponse)
+def create_mock_forecast(site_id: str = "S003", equipment_category_name: str = "Excavators", db: Session = Depends(get_db)):
+    """SIMULATED endpoint for Phase 7 mock generation"""
+    forecast = ensure_simulated_forecast(db, site_id, equipment_category_name)
+    return forecast
+
+@router.post("/forecasts/{forecast_id}/candidates", response_model=List[AllocationCandidateResponse])
+def trigger_candidate_generation(forecast_id: UUID, db: Session = Depends(get_db)):
+    candidates = generate_allocation_candidates(db, forecast_id)
+    return [
+        {
+            "id": c.id,
+            "forecast_id": c.forecast_id,
+            "asset_id": c.asset_id,
+            "score": c.score,
+            "reasoning": c.reasoning,
+            "target_site_id": c.reasoning.get("target_site_id") if c.reasoning else "",
+            "asset_equipment_type_id": c.reasoning.get("asset_equipment_type_id") if c.reasoning else None
+        } for c in candidates
+    ]
+
+@router.get("/forecasts/{forecast_id}/candidates", response_model=List[AllocationCandidateResponse])
+def get_candidates(forecast_id: UUID, db: Session = Depends(get_db)):
+    candidates = get_candidates_for_forecast(db, forecast_id)
+    return [
+        {
+            "id": c.id,
+            "forecast_id": c.forecast_id,
+            "asset_id": c.asset_id,
+            "score": c.score,
+            "reasoning": c.reasoning,
+            "target_site_id": c.reasoning.get("target_site_id") if c.reasoning else "",
+            "asset_equipment_type_id": c.reasoning.get("asset_equipment_type_id") if c.reasoning else None
+        } for c in candidates
+    ]
+
+@router.post("/candidates/{candidate_id}/recommend", response_model=RecommendationResponse)
+def trigger_recommendation(candidate_id: UUID, db: Session = Depends(get_db)):
+    try:
+        rec = create_recommendation(db, candidate_id)
+        return rec
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/recommendations", response_model=List[RecommendationResponse])
+def list_recommendations(db: Session = Depends(get_db)):
+    recs = db.query(Recommendation).all()
+    # Add candidate for convenience
+    for rec in recs:
+        rec.candidate = db.query(AllocationCandidate).filter(AllocationCandidate.id == rec.selected_candidate_id).first()
+    return recs
+
+@router.get("/recommendations/{recommendation_id}", response_model=RecommendationResponse)
+def get_recommendation_detail(recommendation_id: UUID, db: Session = Depends(get_db)):
+    rec = db.query(Recommendation).filter(Recommendation.id == recommendation_id).first()
+    if not rec:
+        raise HTTPException(status_code=404, detail="Recommendation not found")
+    rec.candidate = db.query(AllocationCandidate).filter(AllocationCandidate.id == rec.selected_candidate_id).first()
+    return rec
+
+@router.post("/recommendations/{recommendation_id}/approve", response_model=RecommendationResponse)
+def approve_recommendation(recommendation_id: UUID, req: RecommendationActionRequest, db: Session = Depends(get_db)):
+    try:
+        return process_action(db, recommendation_id, req.user_id, config.ACTION_APPROVE, req.notes)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/recommendations/{recommendation_id}/reject", response_model=RecommendationResponse)
+def reject_recommendation(recommendation_id: UUID, req: RecommendationActionRequest, db: Session = Depends(get_db)):
+    try:
+        return process_action(db, recommendation_id, req.user_id, config.ACTION_REJECT, req.notes)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/recommendations/{recommendation_id}/execute", response_model=RecommendationResponse)
+def execute_recommendation(recommendation_id: UUID, req: RecommendationActionRequest, db: Session = Depends(get_db)):
+    try:
+        return process_action(db, recommendation_id, req.user_id, config.ACTION_EXECUTE, req.notes)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/recommendations/{recommendation_id}/impact", response_model=List[ImpactRecordResponse])
+def get_impact_records(recommendation_id: UUID, db: Session = Depends(get_db)):
+    # Find all actions for this recommendation, then their impact records
+    from app.models.all import RecommendationAction
+    actions = db.query(RecommendationAction).filter(RecommendationAction.recommendation_id == recommendation_id).all()
+    action_ids = [a.id for a in actions]
+    impacts = db.query(ImpactRecord).filter(ImpactRecord.action_id.in_(action_ids)).all()
+    return impacts
+
 @router.get("/alerts", response_model=List[AlertResponse])
 def get_alerts(db: Session = Depends(get_db)):
     return db.query(Alert).all()

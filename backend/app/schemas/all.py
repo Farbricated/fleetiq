@@ -204,6 +204,30 @@ class ModelRunResponse(BaseModel):
     metrics: Optional[dict] = None
     created_at: datetime
 
+# --- Phase 8, 9, 10 Models ---
+
+class AllocationCandidateResponse(BaseModel):
+    id: UUID
+    forecast_id: UUID
+    asset_id: str
+    score: float
+    reasoning: dict
+    target_site_id: str
+    asset_equipment_type_id: Optional[UUID] = None
+
+    class Config:
+        from_attributes = True
+
+class RecommendationResponse(BaseModel):
+    id: UUID
+    selected_candidate_id: UUID
+    action_type: Optional[str] = None
+    confidence: Optional[float] = None
+    status: Optional[str] = None
+    
+    # Relationships for convenience
+    candidate: Optional[AllocationCandidateResponse] = None
+
     class Config:
         from_attributes = True
 
@@ -214,3 +238,31 @@ class DemandHistoryResponse(BaseModel):
     period_end: date
     demand_count: int
     provenance: str
+
+class RecommendationActionRequest(BaseModel):
+    user_id: UUID
+    notes: Optional[str] = None
+
+class RecommendationActionResponse(BaseModel):
+    id: UUID
+    recommendation_id: UUID
+    user_id: UUID
+    action: str
+    previous_status: Optional[str] = None
+    new_status: Optional[str] = None
+    notes: Optional[str] = None
+    timestamp: datetime
+
+    class Config:
+        from_attributes = True
+
+class ImpactRecordResponse(BaseModel):
+    id: UUID
+    action_id: UUID
+    metric: str
+    estimated_value: float
+    actual_value: Optional[float] = None
+    is_illustrative: bool = True
+
+    class Config:
+        from_attributes = True
