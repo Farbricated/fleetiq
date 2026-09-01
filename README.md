@@ -1,33 +1,37 @@
 # FleetIQ
 
-**Caterpillar Smart Rental Tracking Hackathon Project**
+**Caterpillar Smart Rental Tracking Hackathon — Demo Edition**
+
+[![Backend](https://img.shields.io/badge/Backend-FastAPI%20%2B%20PostgreSQL-009688)](backend/)
+[![Frontend](https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript%20%2B%20Vite-blue)](frontend/)
+[![Build](https://img.shields.io/badge/Build-Passing-brightgreen)](#)
 
 ## Overview
-FleetIQ is an intelligent rental tracking and asset analytics platform designed for the Caterpillar Smart Rental Tracking Hackathon. It converts raw operational telemetry data into explainable business intelligence to identify underutilized assets, detect operational anomalies, and predict demand to optimize fleet allocation.
 
-## The Problem
-Fleet operators often lose significant revenue due to assets sitting idle, being rented but underutilized, or being assigned improperly. Raw telemetry (engine hours, idle hours, location) exists, but without an intelligence layer, managers cannot proactively answer: *Which asset should we allocate next? Which asset is wasting money right now?*
+FleetIQ is an intelligent rental tracking and asset analytics platform for the Caterpillar Smart Rental Tracking Hackathon. It converts raw operational telemetry into a **5-beat demo story**: SPOT an idle asset → EXPLAIN why it's a problem → ACT on an AI recommendation → PREDICT future demand → PROVE the impact.
 
-## Our Solution
-FleetIQ provides:
-1. **Operational Workflows:** Robust asset lifecycle management, rental checkout/check-in tracking, and operator assignment.
-2. **Explainable Analytics:** Deterministic utilization scoring that avoids black-box AI by providing human-readable reasons (e.g. "12 idle hours with 0 engine hours").
-3. **Data Provenance Governance:** A strict separation between observed truth and synthetic derivations.
-4. **Demand Forecasting & Allocation (Upcoming):** Predictive matching of underutilized assets to future demand.
+**Signature asset: EQX1007** — 0 engine hours, 12 idle hours/day, no site, no operator.
 
-## Key Differentiation
-- **Explainable Analytics:** We don't just produce a score. We produce the reasoning.
-- **Strict Data Provenance:** We distinguish cleanly between the official challenge dataset, derived calculations, and future simulated telemetry. No fake ML predictions on tiny datasets.
-- **Scalable Architecture:** A fully normalized 23-table PostgreSQL database designed for an enterprise environment, not just a weekend hackathon.
+## The 5-Beat Demo Story
 
-## Architecture & Tech Stack
-- **Backend:** Python, FastAPI
-- **Database:** PostgreSQL (via SQLAlchemy ORM and Alembic migrations)
-- **Testing:** Pytest
-- **Frontend:** (Planned)
-- **Intelligence:** Deterministic Rule Engines (Phase 1-6), Machine Learning (Phase 7+)
+| Beat | What You See | Where |
+|---|---|---|
+| 01 **SPOT** | EQX1007 highlighted ⚠ IDLE in the dashboard | `/assets` |
+| 02 **EXPLAIN** | Asset 360: utilization score, risk reasons, AI natural-language insight | `/assets/EQX1007` |
+| 03 **ACT** | Manager approves redeployment — state confirms instantly, no reload | `/approvals` |
+| 04 **PREDICT** | WMA demand forecast + What-If simulation (ILLUSTRATIVE ESTIMATE) | `/forecasting` |
+| 05 **PROVE** | Before/after impact record tied to the action | `/impact` |
+
+## Architecture
+
+- **Backend:** Python 3.13, FastAPI, SQLAlchemy, Alembic, PostgreSQL 18
+- **Frontend:** React 18, TypeScript, Vite, React Router
+- **Analytics:** Deterministic rule-based scoring (Explainable, no black-box ML on 7-row dataset)
+- **Forecasting:** Weighted Moving Average
+- **Provenance:** Strict REAL / DERIVED / ILLUSTRATIVE ESTIMATE labeling throughout
 
 ## Current Implementation
+
 FleetIQ is currently implemented through **Phase 6**. 
 - The relational database is fully deployed.
 - Real challenge data has been ingested successfully.

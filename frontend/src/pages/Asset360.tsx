@@ -24,6 +24,7 @@ export function Asset360() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [opMsg, setOpMsg] = useState<string | null>(null);
+  const [summary, setSummary] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!assetId) return;
@@ -44,12 +45,15 @@ export function Asset360() {
       setAnalytics(an);
       setRisk(r);
       setOperators(ops);
+      // Fetch NL summary (non-blocking)
+      assetsApi.getSummary(assetId).then(s => setSummary(s?.summary_text ?? null)).catch(() => null);
     } catch (e) {
       setError((e as Error).message);
     } finally {
       setLoading(false);
     }
   }, [assetId]);
+
 
   useEffect(() => { load(); }, [load]);
 
@@ -113,6 +117,21 @@ export function Asset360() {
         <div className="spotlight-banner mb-6">
           <div className="spotlight-banner-title">🔴 Primary Demo Signature — High Priority</div>
           <div className="spotlight-banner-heading">EQX1007</div>
+          {summary && (
+            <div style={{
+              background: 'rgba(0,212,170,0.08)',
+              border: '1px solid rgba(0,212,170,0.3)',
+              borderRadius: 8,
+              padding: '12px 16px',
+              marginBottom: 16,
+              fontSize: 14,
+              color: 'var(--text-primary)',
+              lineHeight: 1.6,
+            }}>
+              <span style={{ color: 'var(--accent-primary)', fontWeight: 600, marginRight: 8 }}>⚡ AI Insight:</span>
+              {summary}
+            </div>
+          )}
           <div className="spotlight-banner-sub">
             Backend-calculated underutilization and risk scores displayed below. No values are hardcoded.
           </div>

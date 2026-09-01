@@ -259,3 +259,7 @@ class ImpactRecordResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class AssetSummaryResponse(BaseModel):
+    asset_id: str
+    summary_text: str

@@ -13,6 +13,7 @@ export const assetsApi = {
   getEvents: (id: string) => api.get<Event[]>(`/assets/${id}/events`),
   getAnalytics: (id: string) => api.get<AnalyticsResult>(`/assets/${id}/analytics`),
   getRisk: (id: string) => api.get<RiskResult>(`/assets/${id}/risk`),
+  getSummary: (id: string) => api.get<{ asset_id: string; summary_text: string }>(`/assets/${id}/summary`),
   assignOperator: (assetId: string, operatorId: string) =>
     api.post(`/assets/${assetId}/operator`, { operator_id: operatorId }),
   unassignOperator: (assetId: string) =>

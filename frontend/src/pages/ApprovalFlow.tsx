@@ -47,6 +47,16 @@ export function ApprovalFlow() {
         await recommendationsApi.reject(recId, notes);
       }
       await load();
+      // Animate success
+      const card = document.getElementById('approval-card');
+      if (card) {
+        card.style.transform = 'scale(1.02)';
+        card.style.boxShadow = '0 0 20px var(--accent-primary)';
+        setTimeout(() => {
+          card.style.transform = 'scale(1)';
+          card.style.boxShadow = 'none';
+        }, 300);
+      }
     } catch (e) {
       alert((e as Error).message);
     } finally {
@@ -59,7 +69,13 @@ export function ApprovalFlow() {
     setSubmitting(true);
     try {
       await recommendationsApi.execute(recId, notes);
-      navigate('/actions');
+      // Inline visual confirmation before navigating
+      const btn = document.getElementById('execute-btn');
+      if (btn) {
+        btn.innerHTML = 'Executing...';
+        btn.style.opacity = '0.7';
+      }
+      setTimeout(() => navigate('/actions'), 600);
     } catch (e) {
       alert((e as Error).message);
     } finally {
@@ -77,7 +93,7 @@ export function ApprovalFlow() {
         <p className="page-subtitle">Human-in-the-loop decision on AI recommendations</p>
       </div>
 
-      <div className="card" style={{ maxWidth: 640 }}>
+      <div id="approval-card" className="card" style={{ maxWidth: 640, transition: 'all 0.3s ease' }}>
         <div className="card-header">
           <div>
             <div className="card-title">Recommendation Status: {recommendation.status}</div>

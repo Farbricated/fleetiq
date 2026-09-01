@@ -380,6 +380,33 @@ def get_asset_risk(asset_id: str, db: Session = Depends(get_db)):
     if not asset: raise HTTPException(status_code=404, detail="Asset not found")
     return analyze_asset_risk(db, asset_id)
 
+@router.get("/assets/{asset_id}/summary", response_model=AssetSummaryResponse)
+def get_asset_summary(asset_id: str, db: Session = Depends(get_db)):
+    asset = db.query(Asset).filter(Asset.id == asset_id).first()
+    if not asset: raise HTTPException(status_code=404, detail="Asset not found")
+    utilization = analyze_asset_utilization(db, asset_id)
+    risk = analyze_asset_risk(db, asset_id)
+    
+    # Generate a deterministic natural-language summary based on the results
+    text_parts = []
+    
+    # Utilization
+    if utilization.underutilization_severity in ["HIGH", "CRITICAL"]:
+        text_parts.append(f"Asset is severely underutilized with an idle rate of {utilization.idle_rate_percentage:.1f}%.")
+    elif utilization.underutilization_severity == "LOW":
+        text_parts.append("Asset is operating efficiently with minimal idle time.")
+    else:
+        text_parts.append("Asset utilization is within normal parameters.")
+        
+    # Risk
+    if risk.risk_level in ["HIGH", "CRITICAL"]:
+        text_parts.append("It poses a critical operational risk, likely due to prolonged idle hours without an active operator or site assignment.")
+        if "Missing Operator Assignment" in risk.reasons:
+            text_parts.append("The system strongly recommends reassigning or returning it immediately.")
+            
+    return AssetSummaryResponse(asset_id=asset_id, summary_text=" ".join(text_parts))
+
+
 @router.get("/analytics/fleet", response_model=FleetAnalyticsSummary)
 def get_fleet_analytics(db: Session = Depends(get_db)):
     total_assets = db.query(Asset).count()
