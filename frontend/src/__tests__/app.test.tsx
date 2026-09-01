@@ -371,15 +371,9 @@ describe('ApprovalFlow', () => {
 });
 
 describe('ImpactPage', () => {
-  it('renders ILLUSTRATIVE ESTIMATE badges', () => {
+  it('renders empty state when no action selected', () => {
     wrap(<ImpactPage />);
-    const pills = screen.getAllByText('Illustrative Est.');
-    expect(pills.length).toBeGreaterThan(0);
-  });
-
-  it('renders disclaimer text', () => {
-    wrap(<ImpactPage />);
-    expect(screen.getByText(/ILLUSTRATIVE ESTIMATE — Important Disclaimer/)).toBeTruthy();
+    expect(screen.getByText('No Action Selected')).toBeTruthy();
   });
 });
 

@@ -77,7 +77,7 @@ export function ActionStatus() {
                       <td>
                         <button
                           className="btn btn-secondary btn-sm"
-                          onClick={() => navigate('/impact')}
+                          onClick={() => navigate(`/impact/${a.id}`)}
                           disabled={a.status !== 'EXECUTED'}
                         >
                           View Impact →

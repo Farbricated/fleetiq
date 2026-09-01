@@ -44,7 +44,7 @@ function App() {
               <Route path="/recommendations" element={<RecommendationsPage />} />
               <Route path="/approvals" element={<ApprovalFlow />} />
               <Route path="/actions" element={<ActionStatus />} />
-              <Route path="/impact" element={<ImpactPage />} />
+              <Route path="/impact/:recommendationId" element={<ImpactPage />} />
               <Route path="/rentals" element={<RentalWorkflow />} />
               <Route path="*" element={
                 <div className="state-container">
