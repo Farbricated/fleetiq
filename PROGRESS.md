@@ -77,11 +77,12 @@ See docs/ADR-001-hackathon-scope-cuts.md
   - Added `CORSMiddleware` to `app/main.py` allowing frontend connections.
   - Fixed `AttributeError` in `/assets/EQX1007/summary` (`idle_rate_percentage` -> `idle_percent`, `risk.reasons` -> `risk.risk_factors`).
   - Added `pool_pre_ping=True` in `database.py` to prevent SQL connection drops on WSL restart.
-- **Phase 13 — UI/UX Overhaul**:
+- **Phase 13 — UI/UX Overhaul & Final Cleanup**:
   - Replaced dark neon theme with a minimal professional light theme (white/slate palette, blue accent).
-  - Removed all "Demo Edition" hackathon narrative: beat badges, 5-beat TopBar progress, hardcoded EQX1007 DEMO/IDLE highlights, What-If simulation stub.
+  - Cleaned up `FleetCommandCenter` (Dashboard) — removed the 5-beat demo journey breadcrumbs and the massive hardcoded red spotlight banner for EQX1007.
+  - Removed all "Demo Edition" hackathon narrative across the app: beat badges, TopBar progress, hardcoded `DEMO` badges in asset lists, What-If simulation stub.
+  - Transformed `AllocationCandidates` and `ApprovalFlow` from rigid demo detail pages into fully-functional dynamic list/queue pages.
   - Restructured sidebar from "DEMO STORY / SYSTEM" to "Overview / Intelligence / Operations".
-  - Fixed `/impact` route — now accessible without a `recommendationId`.
   - CSS reduced from 28 KB → 11.5 KB (45% lighter, cleaner selectors).
 - **Backend tests**: ✅ 17/17 PASSING (run via `start_demo.sh` first)
 - **Frontend build**: ✅ 0 TypeScript errors, 291ms build time

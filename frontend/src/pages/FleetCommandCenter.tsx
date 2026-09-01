@@ -84,32 +84,7 @@ export function FleetCommandCenter() {
         </p>
       </div>
 
-      {/* EQX1007 Spotlight */}
-      <EQX1007Spotlight onViewAsset={() => navigate('/assets/EQX1007')} />
 
-      {/* Journey path */}
-      <div className="journey-path" aria-label="Demo journey">
-        {[
-          { label: 'Fleet Overview', done: true },
-          { label: 'Identify Risk', done: true },
-          { label: 'Asset 360', active: true },
-          { label: 'Future Demand', done: false },
-          { label: 'Candidates', done: false },
-          { label: 'Recommendation', done: false },
-          { label: 'Approve', done: false },
-          { label: 'Impact', done: false },
-        ].map((s, i, arr) => (
-          <div className="journey-step" key={s.label}>
-            <div className={`journey-step ${s.done ? 'done' : s.active ? 'active' : ''}`}>
-              <div className="journey-step-content">
-                <div className="journey-step-dot" />
-                <div className="journey-step-label">{s.label}</div>
-              </div>
-            </div>
-            {i < arr.length - 1 && <div className="journey-arrow">→</div>}
-          </div>
-        ))}
-      </div>
 
       {/* Hero Stats Row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
@@ -256,9 +231,6 @@ export function FleetCommandCenter() {
                     >
                       {a.status ?? '—'}
                     </span>
-                    {a.id === 'EQX1007' && (
-                      <span className="badge badge-critical" style={{ marginLeft: 6 }}>DEMO</span>
-                    )}
                   </td>
                   <td>
                     <button
@@ -303,48 +275,3 @@ export function FleetCommandCenter() {
   );
 }
 
-function EQX1007Spotlight({ onViewAsset }: { onViewAsset: () => void }) {
-  return (
-    <div className="spotlight-banner mb-6" id="eqx1007-spotlight">
-      <div className="spotlight-banner-title">🔴 Signature Demo Asset — Action Required</div>
-      <div className="spotlight-banner-heading">EQX1007</div>
-      <div className="spotlight-banner-sub">
-        Excavator · HIGH underutilization · CRITICAL risk · No operator assigned · No site
-      </div>
-      <div className="spotlight-facts">
-        <div className="spotlight-fact">
-          <div className="spotlight-fact-label">Engine Hours</div>
-          <div className="spotlight-fact-value" style={{ color: 'var(--color-critical)' }}>0h</div>
-        </div>
-        <div className="spotlight-fact">
-          <div className="spotlight-fact-label">Idle Hours</div>
-          <div className="spotlight-fact-value" style={{ color: 'var(--color-high)' }}>12h</div>
-        </div>
-        <div className="spotlight-fact">
-          <div className="spotlight-fact-label">Utilization</div>
-          <div className="spotlight-fact-value" style={{ color: 'var(--color-critical)' }}>0%</div>
-        </div>
-        <div className="spotlight-fact">
-          <div className="spotlight-fact-label">Underutil. Score</div>
-          <div className="spotlight-fact-value">70 / HIGH</div>
-        </div>
-        <div className="spotlight-fact">
-          <div className="spotlight-fact-label">Risk Level</div>
-          <div className="spotlight-fact-value" style={{ color: 'var(--color-critical)' }}>CRITICAL</div>
-        </div>
-        <div className="spotlight-fact">
-          <div className="spotlight-fact-label">Operator</div>
-          <div className="spotlight-fact-value" style={{ color: 'var(--text-muted)' }}>None</div>
-        </div>
-      </div>
-      <div style={{ marginTop: 16, display: 'flex', gap: 10 }}>
-        <button className="btn btn-primary" id="eqx1007-view-btn" onClick={onViewAsset}>
-          Open Asset 360 →
-        </button>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)', alignSelf: 'center' }}>
-          Live values from backend · REAL official challenge dataset
-        </span>
-      </div>
-    </div>
-  );
-}
