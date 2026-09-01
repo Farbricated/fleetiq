@@ -66,3 +66,15 @@
 `GET /forecasts` - Returns generated forecasts, optionally filtered by `site_id` or `equipment_type` (`List[ForecastDetailResponse]`)
 `GET /forecasts/runs` - Returns model run governance records for forecasts (`List[ModelRunResponse]`)
 `GET /forecasts/{forecast_id}` - Returns specific forecast details (`ForecastDetailResponse`)
+
+### 8. Allocation Intelligence (Phase 8)
+`POST /forecasts/mock` - Generates mock forecast for testing. Returns `ForecastResponse`
+`POST /forecasts/{forecast_id}/candidates` - Generates allocation candidates. Returns `List[AllocationCandidateResponse]`
+`GET /forecasts/{forecast_id}/candidates` - Returns `List[AllocationCandidateResponse]`
+
+### 9. Recommendations (Phase 9 & 10)
+`GET /recommendations` - Returns `List[RecommendationResponse]`
+`POST /candidates/{candidate_id}/recommend` - Creates a recommendation for a candidate. Returns `RecommendationResponse`
+`POST /recommendations/{recommendation_id}/approve` - Approves a pending recommendation.
+`POST /recommendations/{recommendation_id}/reject` - Rejects a pending recommendation.
+`POST /recommendations/{recommendation_id}/execute` - Executes an approved recommendation, creating an ImpactRecord.
