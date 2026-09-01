@@ -1,11 +1,11 @@
 import '@testing-library/jest-dom';
 
 // Mock fetch globally
-global.fetch = vi.fn();
+globalThis.fetch = vi.fn();
 
 // Utility to mock a fetch response
 export function mockFetchResponse(data: unknown, ok = true) {
-  (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+  (globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
     ok,
     json: async () => data,
     text: async () => JSON.stringify(data),

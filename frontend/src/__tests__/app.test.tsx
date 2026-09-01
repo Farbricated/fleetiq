@@ -186,7 +186,7 @@ describe('UtilizationBar', () => {
 describe('FleetCommandCenter', () => {
   it('shows loading state initially', () => {
     // Mock slow fetch
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue(
+    (globalThis.fetch as ReturnType<typeof vi.fn>).mockResolvedValue(
       new Promise(() => {})
     );
     wrap(<FleetCommandCenter />);
@@ -219,7 +219,7 @@ describe('FleetCommandCenter', () => {
   });
 
   it('shows error state on API failure', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Network error'));
+    (globalThis.fetch as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Network error'));
 
     wrap(<FleetCommandCenter />);
     await waitFor(() => {

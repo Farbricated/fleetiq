@@ -141,7 +141,7 @@ export function UtilizationAnalytics() {
                   fontSize: 12,
                 }}
                 cursor={{ fill: 'rgba(148,163,184,0.05)' }}
-                formatter={(v: number) => [`${v}%`, 'Utilization']}
+                formatter={(v: any) => [`${v}%`, 'Utilization']}
               />
               <Bar dataKey="util" radius={[4, 4, 0, 0]}>
                 {chartData.map((entry) => (
