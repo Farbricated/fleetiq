@@ -28,10 +28,6 @@ def generate_allocation_candidates(db: Session, forecast_id: UUID) -> List[Alloc
             continue
             
         risk_result = analyze_asset_risk(db, asset.id)
-        if risk_result.risk_level == config.RISK_CRITICAL:
-            # Asset is unsafe/unusable automatically ineligible
-            continue
-
         # 2. Score Calculation
         score = 0.0
         reasons = []
