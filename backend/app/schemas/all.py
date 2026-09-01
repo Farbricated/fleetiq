@@ -160,3 +160,57 @@ class FleetAnalyticsSummary(BaseModel):
     high_risk_assets: int
     anomaly_count: int
     overdue_assets: int
+
+# --- Phase 7: Demand Forecasting Schemas ---
+
+class ForecastDetailResponse(BaseModel):
+    id: UUID
+    site_id: str
+    equipment_type_name: Optional[str] = None
+    forecast_date: date
+    period_start: Optional[date] = None
+    period_end: Optional[date] = None
+    predicted_quantity: Optional[int] = None
+    available_supply: Optional[int] = None
+    demand_gap: Optional[int] = None
+    confidence: Optional[float] = None
+    evidence: Optional[str] = None
+    provenance: Optional[str] = None
+    method: Optional[str] = None
+    model_run_id: Optional[UUID] = None
+
+    class Config:
+        from_attributes = True
+
+class ForecastRunResponse(BaseModel):
+    model_run_id: UUID
+    status: str
+    forecasts_generated: int
+    method: str
+    provenance: str
+    horizon_days: int
+    message: str
+
+class ModelRunResponse(BaseModel):
+    id: UUID
+    model_name: str
+    version: str
+    method: Optional[str] = None
+    source: Optional[str] = None
+    parameters: Optional[dict] = None
+    horizon_days: Optional[int] = None
+    provenance: Optional[str] = None
+    status: Optional[str] = None
+    metrics: Optional[dict] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class DemandHistoryResponse(BaseModel):
+    site_id: str
+    equipment_type: str
+    period_start: date
+    period_end: date
+    demand_count: int
+    provenance: str

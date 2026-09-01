@@ -8,10 +8,11 @@ from datetime import date, datetime
 from app.core.database import get_db
 from app.models.all import (
     Asset, Site, Operator, RentalOrder, RentalItem, Telemetry, UsageDaily, Event, Alert, 
-    Forecast, Recommendation, AssetOperatorAssignment
+    Forecast, Recommendation, AssetOperatorAssignment, ModelRun
 )
 from app.schemas.all import *
 from app.services.analytics import analyze_asset_utilization, analyze_asset_risk, register_model_run
+from app.services.forecasting import generate_forecasts, get_demand_history_for_api
 
 router = APIRouter()
 
@@ -343,3 +344,78 @@ def get_fleet_analytics(db: Session = Depends(get_db)):
         anomaly_count=anomaly_count,
         overdue_assets=overdue_assets
     )
+
+# --- Phase 7: Demand Forecasting Endpoints ---
+
+@router.get("/forecasts/history", response_model=List[DemandHistoryResponse], tags=["Forecasting"])
+def get_demand_history(
+    site_id: Optional[str] = None,
+    equipment_type: Optional[str] = None,
+    reference_date: Optional[date] = None,
+):
+    """
+    Get deterministic, simulated demand history.
+    """
+    history = get_demand_history_for_api(
+        reference_date=reference_date,
+        site_id=site_id,
+        equipment_type=equipment_type
+    )
+    return history
+
+
+@router.post("/forecasts/generate", response_model=ForecastRunResponse, tags=["Forecasting"])
+def trigger_forecast_generation(
+    horizon_weeks: int = 4,
+    lookback_weeks: int = 4,
+    reference_date: Optional[date] = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Trigger a Weighted Moving Average forecast run.
+    """
+    result = generate_forecasts(
+        db=db,
+        reference_date=reference_date,
+        horizon_weeks=horizon_weeks,
+        lookback_weeks=lookback_weeks
+    )
+    return result
+
+
+@router.get("/forecasts", response_model=List[ForecastDetailResponse], tags=["Forecasting"])
+def list_forecasts(
+    site_id: Optional[str] = None,
+    equipment_type: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    """
+    Get all generated forecasts, optionally filtered.
+    """
+    query = db.query(Forecast)
+    if site_id:
+        query = query.filter(Forecast.site_id == site_id)
+    if equipment_type:
+        query = query.filter(Forecast.equipment_type_name == equipment_type)
+    
+    return query.order_by(Forecast.forecast_date.desc()).all()
+
+
+@router.get("/forecasts/runs", response_model=List[ModelRunResponse], tags=["Forecasting"])
+def list_model_runs(db: Session = Depends(get_db)):
+    """
+    Get all model runs for governance.
+    """
+    runs = db.query(ModelRun).order_by(ModelRun.created_at.desc()).all()
+    return runs
+
+
+@router.get("/forecasts/{forecast_id}", response_model=ForecastDetailResponse, tags=["Forecasting"])
+def get_forecast(forecast_id: str, db: Session = Depends(get_db)):
+    """
+    Get details of a specific forecast.
+    """
+    forecast = db.query(Forecast).filter(Forecast.id == forecast_id).first()
+    if not forecast:
+        raise HTTPException(status_code=404, detail="Forecast not found")
+    return forecast

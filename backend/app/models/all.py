@@ -24,6 +24,13 @@ class ModelRun(Base):
     version = Column(String(50), nullable=False)
     metrics = Column(JSONB)
     created_at = Column(DateTime, default=datetime.utcnow)
+    # Phase 7: Model governance columns
+    method = Column(String(100), nullable=True)
+    source = Column(String(255), nullable=True)
+    parameters = Column(JSONB, nullable=True)
+    horizon_days = Column(Integer, nullable=True)
+    provenance = Column(String(100), nullable=True)
+    status = Column(String(50), nullable=True)
 
 # --- MASTER DATA ---
 class EquipmentCategory(Base):
@@ -151,10 +158,20 @@ class Forecast(Base):
     __tablename__ = "forecasts"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     site_id = Column(String(255), ForeignKey("sites.id"))
-    equipment_type_id = Column(UUID(as_uuid=True), ForeignKey("equipment_types.id"))
+    equipment_type_id = Column(UUID(as_uuid=True), ForeignKey("equipment_types.id"), nullable=True)
     forecast_date = Column(Date)
     predicted_quantity = Column(Integer)
     model_run_id = Column(UUID(as_uuid=True), ForeignKey("model_runs.id"), nullable=True)
+    # Phase 7: Rich forecast output columns
+    equipment_type_name = Column(String(255), nullable=True)
+    period_start = Column(Date, nullable=True)
+    period_end = Column(Date, nullable=True)
+    available_supply = Column(Integer, nullable=True)
+    demand_gap = Column(Integer, nullable=True)
+    confidence = Column(Float, nullable=True)
+    evidence = Column(Text, nullable=True)
+    provenance = Column(String(100), nullable=True)
+    method = Column(String(100), nullable=True)
 
 class AllocationCandidate(Base):
     __tablename__ = "allocation_candidates"

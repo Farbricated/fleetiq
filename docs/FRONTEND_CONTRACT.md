@@ -57,5 +57,12 @@
 ### 6. Intelligence
 `GET /alerts` - Returns `List[AlertResponse]`
 `GET /alerts/{alert_id}` - Returns `AlertResponse`
-`GET /forecasts` - Returns `List[ForecastResponse]`
+`GET /forecasts` - Returns `List[ForecastDetailResponse]` (Phase 7)
 `GET /recommendations` - Returns `List[RecommendationResponse]`
+
+### 7. Demand Forecasting (Phase 7)
+`GET /forecasts/history` - Returns deterministic, simulated demand history (`List[DemandHistoryResponse]`)
+`POST /forecasts/generate` - Triggers forecast generation via WMA and returns run details (`ForecastRunResponse`)
+`GET /forecasts` - Returns generated forecasts, optionally filtered by `site_id` or `equipment_type` (`List[ForecastDetailResponse]`)
+`GET /forecasts/runs` - Returns model run governance records for forecasts (`List[ModelRunResponse]`)
+`GET /forecasts/{forecast_id}` - Returns specific forecast details (`ForecastDetailResponse`)
