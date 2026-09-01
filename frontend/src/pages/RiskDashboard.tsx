@@ -35,7 +35,11 @@ export function RiskDashboard() {
       );
       const valid = enriched.filter(Boolean) as AssetRisk[];
       const order = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
-      valid.sort((a, b) => order.indexOf(a.risk.risk_level) - order.indexOf(b.risk.risk_level));
+      valid.sort((a, b) => {
+        const diff = order.indexOf(a.risk.risk_level) - order.indexOf(b.risk.risk_level);
+        if (diff !== 0) return diff;
+        return parseFloat(b.risk.risk_score) - parseFloat(a.risk.risk_score);
+      });
       setData(valid);
     } catch (e) {
       setError((e as Error).message);
@@ -130,7 +134,10 @@ export function RiskDashboard() {
                       <span className="badge badge-critical" style={{ marginLeft: 6 }}>DEMO</span>
                     )}
                   </td>
-                  <td><SeverityBadge level={risk.risk_level} /></td>
+                  <td>
+                    {risk.risk_level === 'CRITICAL' && <span className="pulse-dot"></span>}
+                    <SeverityBadge level={risk.risk_level} />
+                  </td>
                   <td className="mono">{risk.risk_score}</td>
                   <td style={{ fontSize: 12, color: 'var(--text-muted)', maxWidth: 280 }}>
                     {risk.risk_factors[0] ?? '—'}

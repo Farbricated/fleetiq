@@ -111,14 +111,30 @@ export function FleetCommandCenter() {
         ))}
       </div>
 
-      {/* KPI Grid */}
-      <div className="kpi-grid mb-6">
-        {kpiTiles.map((t) => (
-          <div key={t.label} className={`kpi-tile ${t.cls}`}>
-            <div className="kpi-label">{t.label}</div>
-            <div className={`kpi-value ${t.cls}`}>{t.value}</div>
+      {/* Hero Stats Row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+        <div className="stat-hero-card">
+          <div className="stat-hero-value">{summary.total_assets}</div>
+          <div className="stat-hero-label">Total Assets</div>
+        </div>
+        <div className="stat-hero-card" style={{ borderTopColor: 'var(--color-critical)' }}>
+          <div className="stat-hero-value">
+            {fleet.idle_assets > 0 && <span className="pulse-dot"></span>}
+            {fleet.idle_assets}
           </div>
-        ))}
+          <div className="stat-hero-label">Idle Assets</div>
+        </div>
+        <div className="stat-hero-card" style={{ borderTopColor: fleet.average_utilization < 30 ? 'var(--color-critical)' : 'var(--accent-primary)' }}>
+          <div className="stat-hero-value">{fleet.average_utilization.toFixed(1)}%</div>
+          <div className="stat-hero-label">Avg Utilization</div>
+        </div>
+        <div className="stat-hero-card" style={{ borderTopColor: fleet.high_risk_assets > 0 ? 'var(--color-critical)' : 'var(--accent-primary)' }}>
+          <div className="stat-hero-value">
+            {fleet.high_risk_assets > 0 && <span className="pulse-dot"></span>}
+            {fleet.high_risk_assets}
+          </div>
+          <div className="stat-hero-label">High Risk Assets</div>
+        </div>
       </div>
 
       <div className="section-grid section-grid-2-1 mb-6">

@@ -392,7 +392,7 @@ def get_asset_summary(asset_id: str, db: Session = Depends(get_db)):
     
     # Utilization
     if utilization.underutilization_severity in ["HIGH", "CRITICAL"]:
-        text_parts.append(f"Asset is severely underutilized with an idle rate of {utilization.idle_rate_percentage:.1f}%.")
+        text_parts.append(f"Asset is severely underutilized with an idle rate of {utilization.idle_percent:.1f}%.")
     elif utilization.underutilization_severity == "LOW":
         text_parts.append("Asset is operating efficiently with minimal idle time.")
     else:
@@ -401,7 +401,7 @@ def get_asset_summary(asset_id: str, db: Session = Depends(get_db)):
     # Risk
     if risk.risk_level in ["HIGH", "CRITICAL"]:
         text_parts.append("It poses a critical operational risk, likely due to prolonged idle hours without an active operator or site assignment.")
-        if "Missing Operator Assignment" in risk.reasons:
+        if "Missing Operator Assignment" in risk.risk_factors:
             text_parts.append("The system strongly recommends reassigning or returning it immediately.")
             
     return AssetSummaryResponse(asset_id=asset_id, summary_text=" ".join(text_parts))
