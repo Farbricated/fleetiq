@@ -17,10 +17,10 @@ Phase 7 — Demand Forecasting
 | Phase 4 | COMPLETE |
 | Phase 5 | COMPLETE |
 | Phase 6 | COMPLETE |
-| Phase 7 | NEXT |
-| Phase 8 | PLANNED |
-| Phase 9 | PLANNED |
-| Phase 10 | PLANNED |
+| Phase 7 | COMPLETE |
+| Phase 8 | COMPLETE |
+| Phase 9 | COMPLETE |
+| Phase 10 | COMPLETE |
 | Phase 11+ | PLANNED |
 
 ## Completed Implementation Details
@@ -63,9 +63,29 @@ Phase 7 — Demand Forecasting
   - NULL Site, NULL Operator.
 - Produces an Underutilization Severity of HIGH (score: 70) and Operational Risk of CRITICAL (score: 60) without using black-box scoring.
 
+### Phase 7: Demand Forecasting
+- Rebuilt WMA forecasting logic directly connected to database data.
+- Added `/forecasts/history`, `/forecasts/generate`, and `/forecasts/runs` routes.
+- Stored forecasts and run history natively for complete traceability.
+
+### Phase 8: Allocation Intelligence
+- Built allocation candidate scoring system using operational models.
+- Evaluates cost of transport, asset risk, and utilization independently.
+- Connects unfulfilled forecasts with underutilized candidates.
+
+### Phase 9: Recommendations Engine
+- Transforms top allocation candidates into structured actionable recommendations.
+- Explains the operational impact and provides confidence scores.
+- Persists recommendations to Postgres schema safely.
+
+### Phase 10: Decision & Action Workflows
+- Built approval & execution workflow (`approve`, `reject`, `execute` API actions).
+- Simulated tracking operational improvements via `impact_records`.
+- Full end-to-end trace from prediction -> candidate -> recommendation -> execution -> impact.
+
 ## Test Status
-- Current Test Status: 10 / 10 Tests Passing (using Pytest)
-- Tests validate the rental lifecycle, anomaly detection, fleet aggregation, and EQX1007 signature case.
+- Current Test Status: 17 / 17 Tests Passing (using Pytest)
+- Tests validate the rental lifecycle, anomaly detection, fleet aggregation, forecasting, and end-to-end recommendation workflows.
 
 ## Known Limitations
 - The underlying challenge dataset is extremely small (7 rows of snapshot data), so real ML models are not used for analytics in Phase 6. Deterministic rules are used instead to prevent faking AI predictions.

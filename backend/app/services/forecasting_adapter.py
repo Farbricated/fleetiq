@@ -46,9 +46,13 @@ def ensure_simulated_forecast(db: Session, site_id: str = "S003", equipment_cate
     forecast = Forecast(
         site_id=site_id,
         equipment_type_id=eq_type.id if eq_type else None,
+        equipment_type_name=eq_type.name if eq_type else equipment_category_name,
         forecast_date=date.today(),
         predicted_quantity=quantity,
-        model_run_id=model_run.id
+        model_run_id=model_run.id,
+        confidence=0.85,
+        evidence="Mock forecast",
+        provenance="ILLUSTRATIVE ESTIMATE"
     )
     db.add(forecast)
     db.commit()

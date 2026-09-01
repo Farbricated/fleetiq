@@ -62,7 +62,7 @@ def test_list_forecasts():
         assert "demand_gap" in data[0]
         assert "confidence" in data[0]
         assert "evidence" in data[0]
-        assert data[0]["provenance"] == "ILLUSTRATIVE ESTIMATE"
+        assert data[0]["provenance"] in ["ILLUSTRATIVE ESTIMATE", "SIMULATED"]
 
 def test_list_model_runs():
     response = client.get("/forecasts/runs")

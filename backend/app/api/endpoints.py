@@ -371,13 +371,6 @@ def get_alert(alert_id: uuid.UUID, db: Session = Depends(get_db)):
     if not alert: raise HTTPException(status_code=404, detail="Alert not found")
     return alert
 
-@router.get("/forecasts", response_model=List[ForecastResponse])
-def get_forecasts(db: Session = Depends(get_db)):
-    return db.query(Forecast).all()
-
-@router.get("/sites/{site_id}/forecasts", response_model=List[ForecastResponse])
-def get_site_forecasts(site_id: str, db: Session = Depends(get_db)):
-    return db.query(Forecast).filter(Forecast.site_id == site_id).all()
 
 @router.get("/recommendations", response_model=List[RecommendationResponse])
 def get_recommendations(db: Session = Depends(get_db)):
