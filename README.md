@@ -41,15 +41,30 @@ FleetIQ is an intelligent fleet analytics and asset allocation platform. It conv
 
 ## Current Implementation
 
-FleetIQ is currently **100% complete** for the Hackathon Demo (through Phase 12). 
+FleetIQ is currently **PRODUCTION READY** (through Phase 13). 
 - The relational database is fully deployed and populated with challenge data.
 - Operational endpoints, fleet-level analytics, demand forecasting, and risk engines are active.
-- The React frontend is fully polished, featuring the 5-Beat Demo Story (SPOT → EXPLAIN → ACT → PREDICT → PROVE).
+- The React frontend is fully polished with a clean, professional SaaS theme.
 - For detailed progress see `PROGRESS.md`.
 
-## Setup & Local Development (One-Click Start)
+## Setup & Local Development
 
-We have created a single script to start the PostgreSQL database, the FastAPI backend, and verify connections.
+You can run FleetIQ natively (via WSL/Linux) or across any OS using Docker Compose.
+
+### Option A: Docker Compose (Recommended cross-platform)
+
+The easiest way to run the entire stack (Database, Backend, Frontend).
+
+1. Ensure Docker Desktop / Engine is running.
+2. Run the stack from the project root:
+```bash
+docker-compose up --build
+```
+3. Open **http://localhost:3000** in your browser. (The backend API is at `http://localhost:8000`).
+
+### Option B: Native WSL / Linux (One-Click Start)
+
+If you prefer running natively without Docker:
 
 1. **Start Backend & Database (WSL):**
 ```bash
@@ -63,9 +78,7 @@ cd frontend
 npm install
 npm run dev
 ```
-
-3. **View the Application:**
-Open your browser to `http://localhost:3000`
+3. Open **http://localhost:3000** in your browser.
 
 ## Testing
 Run the complete test suite to verify operational API contracts and analytics rules:
