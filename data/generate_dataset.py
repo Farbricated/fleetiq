@@ -126,6 +126,14 @@ def generate_and_ingest():
             db.add(op)
     db.commit()
 
+    print("Building Default Users...")
+    default_uid = uuid.UUID("ac4c2e9b-efad-4a6f-9985-cc6bc09bf33c")
+    user = db.query(User).filter_by(id=default_uid).first()
+    if not user:
+        user = User(id=default_uid, name="Demo Manager", role="MANAGER")
+        db.add(user)
+        db.commit()
+
     # --- 4. INGEST OFFICIAL DATA ---
     print("Ingesting Official Challenge Data...")
     df = pd.read_csv('data/CHALLENGE_DATA.csv')
