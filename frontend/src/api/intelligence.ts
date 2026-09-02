@@ -13,8 +13,8 @@ export const recommendationsApi = {
   getAll: () => api.get<Recommendation[]>('/recommendations'),
   getById: (id: string) => api.get<Recommendation>(`/recommendations/${id}`),
   create: (candidateId: string) => api.post<Recommendation>(`/candidates/${candidateId}/recommend`),
-  approve: (id: string, notes?: string) => api.post<Recommendation>(`/recommendations/${id}/approve`, { notes }),
-  reject: (id: string, notes?: string) => api.post<Recommendation>(`/recommendations/${id}/reject`, { notes }),
-  execute: (id: string, notes?: string) => api.post<Recommendation>(`/recommendations/${id}/execute`, { notes }),
+  approve: (id: string, notes?: string) => api.post<Recommendation>(`/recommendations/${id}/approve`, { notes, user_id: 'ac4c2e9b-efad-4a6f-9985-cc6bc09bf33c' }),
+  reject: (id: string, notes?: string) => api.post<Recommendation>(`/recommendations/${id}/reject`, { notes, user_id: 'ac4c2e9b-efad-4a6f-9985-cc6bc09bf33c' }),
+  execute: (id: string, notes?: string) => api.post<Recommendation>(`/recommendations/${id}/execute`, { notes, user_id: 'ac4c2e9b-efad-4a6f-9985-cc6bc09bf33c' }),
   getImpact: (id: string) => api.get<ImpactRecord[]>(`/recommendations/${id}/impact`),
 };
