@@ -189,6 +189,10 @@ def checkin_rental(rental_id: uuid.UUID, req: RentalCheckinRequest, db: Session 
         asset.status = "AVAILABLE"
         log_event(db, asset.id, "CHECKIN")
         
+    ro = db.query(RentalOrder).filter(RentalOrder.id == rental_id).first()
+    if ro:
+        ro.status = "RETURNED"
+        
     db.commit()
     return {"status": "ok"}
 
