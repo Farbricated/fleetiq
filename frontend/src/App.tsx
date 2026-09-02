@@ -15,6 +15,7 @@ import { ApprovalFlow } from './pages/ApprovalFlow';
 import { ActionStatus } from './pages/ActionStatus';
 import { ImpactPage } from './pages/ImpactPage';
 import { RentalWorkflow } from './pages/RentalWorkflow';
+import { CopilotWidget } from './components/chat/CopilotWidget';
 
 function App() {
   const [apiOnline, setApiOnline] = useState<boolean | null>(null);
@@ -57,6 +58,7 @@ function App() {
             </Routes>
           </main>
         </div>
+        <CopilotWidget />
       </div>
     </BrowserRouter>
   );

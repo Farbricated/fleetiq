@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { assetsApi, operatorsApi } from '../api/assets';
+import { chatApi } from '../api/chat';
 import type { Asset, UsageDaily, Event, AnalyticsResult, RiskResult, Operator } from '../types';
 import { LoadingState, ErrorState, EmptyState } from '../components/ui/States';
 import { SeverityBadge, AssetStatusBadge } from '../components/ui/Badge';
@@ -45,8 +46,10 @@ export function Asset360() {
       setAnalytics(an);
       setRisk(r);
       setOperators(ops);
-      // Fetch NL summary (non-blocking)
-      assetsApi.getSummary(assetId).then(s => setSummary(s?.summary_text ?? null)).catch(() => null);
+      // Fetch NL summary from AI Copilot (non-blocking)
+      chatApi.getAssetExplanation(assetId)
+        .then(res => setSummary(res.data.answer))
+        .catch(() => setSummary('AI Explanation unavailable.'));
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -112,26 +115,30 @@ export function Asset360() {
         </div>
       </div>
 
+      {/* Asset LLM Explanation Banner */}
+      {summary && (
+        <div className="spotlight-banner mb-6">
+          <div className="spotlight-banner-title">LLM-generated explanation</div>
+          <div style={{
+            background: 'var(--surface-sunken)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 8,
+            padding: '12px 16px',
+            fontSize: 14,
+            color: 'var(--text-primary)',
+            lineHeight: 1.6,
+          }}>
+            <span style={{ color: 'var(--accent-primary)', fontWeight: 600, marginRight: 8 }}>✨ Grounded AI:</span>
+            {summary}
+          </div>
+        </div>
+      )}
+
       {/* EQX1007 attention banner */}
       {isEQX1007 && analytics && (
         <div className="spotlight-banner mb-6">
           <div className="spotlight-banner-title">🔴 Primary Demo Signature — High Priority</div>
           <div className="spotlight-banner-heading">EQX1007</div>
-          {summary && (
-            <div style={{
-              background: 'rgba(0,212,170,0.08)',
-              border: '1px solid rgba(0,212,170,0.3)',
-              borderRadius: 8,
-              padding: '12px 16px',
-              marginBottom: 16,
-              fontSize: 14,
-              color: 'var(--text-primary)',
-              lineHeight: 1.6,
-            }}>
-              <span style={{ color: 'var(--accent-primary)', fontWeight: 600, marginRight: 8 }}>⚡ AI Insight:</span>
-              {summary}
-            </div>
-          )}
           <div className="spotlight-banner-sub">
             Backend-calculated underutilization and risk scores displayed below. No values are hardcoded.
           </div>

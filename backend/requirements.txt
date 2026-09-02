@@ -9,3 +9,5 @@ pydantic-settings
 pandas
 pytest
 httpx
+openai
+python-dotenv

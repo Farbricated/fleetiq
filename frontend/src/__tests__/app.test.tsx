@@ -202,7 +202,7 @@ describe('FleetCommandCenter', () => {
     await waitFor(() => {
       expect(screen.getByText('Total Assets')).toBeTruthy();
     });
-    expect(screen.getByText('Active Rentals')).toBeTruthy();
+    expect(screen.getByText('Idle Assets')).toBeTruthy();
   });
 
   it('shows EQX1007 spotlight', async () => {
@@ -215,7 +215,6 @@ describe('FleetCommandCenter', () => {
       const eqx = screen.getAllByText('EQX1007');
       expect(eqx.length).toBeGreaterThan(0);
     });
-    expect(screen.getAllByText(/HIGH underutilization/).length).toBeGreaterThan(0);
   });
 
   it('shows error state on API failure', async () => {

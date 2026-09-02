@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 from datetime import date, datetime
 from uuid import UUID
@@ -11,8 +11,7 @@ class AssetResponse(AssetBase):
     model_id: Optional[UUID] = None
     dealer_id: Optional[UUID] = None
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class SiteResponse(BaseModel):
     id: str
@@ -20,16 +19,14 @@ class SiteResponse(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class OperatorResponse(BaseModel):
     id: str
     name: Optional[str] = None
     status: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class RentalResponse(BaseModel):
     id: UUID
@@ -37,8 +34,7 @@ class RentalResponse(BaseModel):
     site_id: Optional[str] = None
     status: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class RentalCheckoutRequest(BaseModel):
     asset_id: str
@@ -56,8 +52,7 @@ class TelemetryResponse(BaseModel):
     lat: Optional[float] = None
     lng: Optional[float] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class UsageResponse(BaseModel):
     id: UUID
@@ -67,8 +62,7 @@ class UsageResponse(BaseModel):
     idle_hours: Optional[float] = None
     operating_days: Optional[int] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class EventResponse(BaseModel):
     id: UUID
@@ -76,8 +70,7 @@ class EventResponse(BaseModel):
     event_type: Optional[str] = None
     timestamp: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class AlertResponse(BaseModel):
     id: UUID
@@ -88,8 +81,7 @@ class AlertResponse(BaseModel):
     reason: Optional[str] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ForecastResponse(BaseModel):
     id: UUID
@@ -97,8 +89,7 @@ class ForecastResponse(BaseModel):
     forecast_date: date
     predicted_quantity: Optional[int] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 
@@ -120,8 +111,7 @@ class OperatorAssignmentResponse(BaseModel):
     operator_id: Optional[str] = None
     start_date: date
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class AnalyticsResult(BaseModel):
     asset_id: str
@@ -172,8 +162,7 @@ class ForecastDetailResponse(BaseModel):
     method: Optional[str] = None
     model_run_id: Optional[UUID] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ForecastRunResponse(BaseModel):
     model_run_id: UUID
@@ -208,8 +197,7 @@ class AllocationCandidateResponse(BaseModel):
     target_site_id: str
     asset_equipment_type_id: Optional[UUID] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class RecommendationResponse(BaseModel):
     id: UUID
@@ -221,8 +209,7 @@ class RecommendationResponse(BaseModel):
     # Relationships for convenience
     candidate: Optional[AllocationCandidateResponse] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class DemandHistoryResponse(BaseModel):
     site_id: str
@@ -246,8 +233,7 @@ class RecommendationActionResponse(BaseModel):
     notes: Optional[str] = None
     timestamp: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ImpactRecordResponse(BaseModel):
     id: UUID
@@ -257,8 +243,7 @@ class ImpactRecordResponse(BaseModel):
     actual_value: Optional[float] = None
     is_illustrative: bool = True
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class AssetSummaryResponse(BaseModel):
     asset_id: str
