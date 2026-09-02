@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { rentalsApi } from '../api/rentals';
 import { equipmentApi } from '../api/assets';
 import type { RentalOrder, EquipmentCategory, EquipmentTypeEntry, EquipmentModelEntry } from '../types';
@@ -505,14 +505,14 @@ export function RentalWorkflow() {
                 <select id="checkin-rental-id" className="form-select"
                   value={checkinRentalId} onChange={e => setCheckinRentalId(e.target.value)}>
                   <option value="">— Select rental to return —</option>
-                  {rentals.filter(r => r.status === 'NEW' || r.status === 'ACTIVE').map(r => (
+                  {rentals.filter(r => r.status === 'ACTIVE').map(r => (
                     <option key={r.id} value={r.id}>
                       {r.id.substring(0, 16)}... · {r.site_id ?? 'No Site'} · [{r.status}]
                     </option>
                   ))}
                 </select>
                 <span className="form-helper">
-                  {rentals.filter(r => r.status === 'NEW' || r.status === 'ACTIVE').length} rental(s) eligible
+                  {rentals.filter(r => r.status === 'ACTIVE').length} rental(s) eligible
                 </span>
               </div>
               <div className="form-group">
