@@ -4,7 +4,7 @@ import type { RentalOrder, RentalCheckoutRequest, RentalCheckinRequest } from '.
 export const rentalsApi = {
   getAll: () => api.get<RentalOrder[]>('/rentals'),
   getById: (id: string) => api.get<RentalOrder>(`/rentals/${id}`),
-  create: () => api.post<RentalOrder>('/rentals'),
+  create: (data?: { site_id?: string; customer_id?: string }) => api.post<RentalOrder>('/rentals', data),
   checkout: (rentalId: string, req: RentalCheckoutRequest) =>
     api.post<{ status: string; rental_item_id: string }>(`/rentals/${rentalId}/checkout`, req),
   checkin: (rentalId: string, req: RentalCheckinRequest) =>

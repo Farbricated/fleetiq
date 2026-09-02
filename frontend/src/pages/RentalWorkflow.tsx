@@ -185,6 +185,10 @@ export function RentalWorkflow() {
   // Stepper: 1=Create, 2=Assign, 3=Confirm
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
+  // Create order state
+  const [createSiteId, setCreateSiteId] = useState('');
+  const [createCustomerId, setCreateCustomerId] = useState('');
+
   // Checkout state
   const [checkoutRentalId,   setCheckoutRentalId]   = useState('');
   const [checkoutAssetId,    setCheckoutAssetId]    = useState('');
@@ -217,7 +221,11 @@ export function RentalWorkflow() {
   const createRental = async () => {
     setCreatingOrder(true); setCheckoutMsg(null);
     try {
-      const r = await rentalsApi.create();
+      const payload = {
+        site_id: createSiteId || undefined,
+        customer_id: createCustomerId || undefined,
+      };
+      const r = await rentalsApi.create(payload);
       setCheckoutRentalId(r.id);
       setStep(2); load();
     } catch (e) { setCheckoutMsg(`Error: ${(e as Error).message}`); }
@@ -344,6 +352,18 @@ export function RentalWorkflow() {
                   <div className="step-action-title">Create a Rental Order</div>
                   <div className="step-action-subtitle">
                     Generate a new rental order. A unique ID will be assigned automatically.
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '20px' }}>
+                    <div className="form-group" style={{ textAlign: 'left' }}>
+                      <label className="form-label" style={{ fontSize: 11 }}>Site ID (Optional)</label>
+                      <input type="text" className="form-input" placeholder="e.g. S001" 
+                        value={createSiteId} onChange={e => setCreateSiteId(e.target.value)} style={{ width: '200px' }} />
+                    </div>
+                    <div className="form-group" style={{ textAlign: 'left' }}>
+                      <label className="form-label" style={{ fontSize: 11 }}>Customer ID (Optional)</label>
+                      <input type="text" className="form-input" placeholder="e.g. C001" 
+                        value={createCustomerId} onChange={e => setCreateCustomerId(e.target.value)} style={{ width: '200px' }} />
+                    </div>
                   </div>
                   <button className="btn btn-primary btn-lg" id="create-rental-btn"
                     onClick={createRental} disabled={creatingOrder}>

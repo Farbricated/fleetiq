@@ -91,6 +91,9 @@ class ForecastResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class RentalCreateRequest(BaseModel):
+    site_id: Optional[str] = None
+    customer_id: Optional[str] = None
 
 
 class DashboardSummary(BaseModel):

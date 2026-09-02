@@ -137,8 +137,11 @@ def get_rental(rental_id: uuid.UUID, db: Session = Depends(get_db)):
     return rental
 
 @router.post("/rentals", response_model=RentalResponse)
-def create_rental(db: Session = Depends(get_db)):
+def create_rental(req: RentalCreateRequest = None, db: Session = Depends(get_db)):
     rental = RentalOrder(status="NEW")
+    if req:
+        rental.site_id = req.site_id
+        rental.customer_id = req.customer_id
     db.add(rental)
     db.commit()
     db.refresh(rental)
