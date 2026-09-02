@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { chatApi, ChatResponse } from '../../api/chat';
+import { chatApi, type ChatResponse } from '../../api/chat';
 
 interface Message {
   id: string;
@@ -52,9 +52,9 @@ export function CopilotWidget() {
       const assistantMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: res.data.answer,
-        sources: res.data.sources,
-        grounded: res.data.grounded
+        content: res.answer,
+        sources: res.sources,
+        grounded: res.grounded
       };
       setMessages(prev => [...prev, assistantMsg]);
     } catch (err) {
