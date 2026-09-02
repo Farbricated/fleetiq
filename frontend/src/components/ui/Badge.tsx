@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 
 // ── Generic Badge ──────────────────────────────────────────────
 interface BadgeProps {
@@ -31,8 +31,8 @@ export function AssetStatusBadge({ status }: { status: string | null }) {
 }
 
 // ── Severity Badge ─────────────────────────────────────────────
-export function SeverityBadge({ severity }: { severity: string | null }) {
-  const s = (severity ?? '').toUpperCase();
+export function SeverityBadge({ severity, level }: { severity?: string | null; level?: string | null }) {
+  const s = ((severity ?? level) ?? '').toUpperCase();
   const cls =
     s === 'CRITICAL' ? 'badge-critical' :
     s === 'HIGH'     ? 'badge-warning'  :
@@ -41,7 +41,7 @@ export function SeverityBadge({ severity }: { severity: string | null }) {
     'badge-neutral';
   return (
     <span className={`badge ${cls}`}>
-      {severity ?? '—'}
+      {severity ?? level ?? '—'}
     </span>
   );
 }

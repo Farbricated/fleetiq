@@ -168,18 +168,21 @@ export function Asset360() {
 
       {/* Tabs */}
       <div className="tabs">
-        {(['overview', 'analytics', 'risk', 'events', 'operations'] as Tab[]).map((t) => (
+        {([
+          { key: 'overview',    icon: '📋', label: 'Overview'    },
+          { key: 'analytics',   icon: '📊', label: 'Utilization' },
+          { key: 'risk',        icon: '🛡',  label: 'Risk'        },
+          { key: 'events',      icon: '📝', label: 'Events'      },
+          { key: 'operations',  icon: '⚙',  label: 'Operations'  },
+        ] as { key: Tab; icon: string; label: string }[]).map((t) => (
           <button
-            key={t}
-            className={`tab-btn ${tab === t ? 'active' : ''}`}
-            id={`tab-${t}`}
-            onClick={() => setTab(t)}
+            key={t.key}
+            className={`tab-btn ${tab === t.key ? 'active' : ''}`}
+            id={`tab-${t.key}`}
+            onClick={() => setTab(t.key)}
           >
-            {t === 'overview' ? '📋 Overview' :
-             t === 'analytics' ? '📊 Utilization' :
-             t === 'risk' ? '🛡 Risk' :
-             t === 'events' ? '📝 Events' :
-             '⚙ Operations'}
+            <span className="tab-btn-icon">{t.icon}</span>
+            <span className="tab-btn-label">{t.label}</span>
           </button>
         ))}
       </div>
