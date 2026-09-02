@@ -1,18 +1,18 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+﻿import { useLocation, useNavigate } from 'react-router-dom';
 
 const BREADCRUMBS: Record<string, string> = {
-  '/': 'Fleet Command Center',
-  '/assets': 'Asset Dashboard',
-  '/alerts': 'Alerts',
-  '/utilization': 'Utilization Analytics',
-  '/risk': 'Risk Dashboard',
-  '/forecasting': 'Demand Forecasting',
-  '/candidates': 'Allocation Candidates',
-  '/recommendations': 'Recommendations',
-  '/approvals': 'Approval / Rejection',
-  '/rentals': 'Rental Workflow',
-  '/actions': 'Action Status',
-  '/impact': 'Impact',
+  '/':               'Command Center',
+  '/assets':         'Assets',
+  '/alerts':         'Alerts',
+  '/utilization':    'Utilization',
+  '/risk':           'Risk',
+  '/forecasting':    'Forecast',
+  '/candidates':     'Allocation',
+  '/recommendations':'Actions',
+  '/approvals':      'Approvals',
+  '/rentals':        'Rentals',
+  '/actions':        'Action Status',
+  '/impact':         'Impact',
 };
 
 export function TopBar() {
@@ -21,27 +21,28 @@ export function TopBar() {
 
   const isAsset360 = location.pathname.startsWith('/assets/') && location.pathname !== '/assets';
   const assetId = isAsset360 ? location.pathname.split('/')[2] : null;
-  const currentLabel = BREADCRUMBS[location.pathname] ?? (isAsset360 ? `Asset 360` : location.pathname);
+  const currentLabel = BREADCRUMBS[location.pathname] ?? (isAsset360 ? 'Asset 360' : location.pathname);
 
   return (
-    <header className="topbar" role="banner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <header className="topbar" role="banner">
+      {/* Breadcrumb */}
       <nav className="topbar-breadcrumb" aria-label="Breadcrumb" style={{ flex: 1 }}>
         <span
-          style={{ cursor: 'pointer', color: 'var(--text-muted)' }}
+          style={{ cursor: 'pointer', color: 'var(--fleet-yellow-dark)', fontWeight: 700 }}
           onClick={() => navigate('/')}
         >
-          FleetIQ
+          FLEETIQ
         </span>
-        <span style={{ color: 'var(--text-muted)' }}>›</span>
+        <span style={{ color: 'var(--fleet-gray-light)' }}>›</span>
         {isAsset360 ? (
           <>
             <span
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: 'pointer', color: 'var(--fleet-gray-mid)' }}
               onClick={() => navigate('/assets')}
             >
-              Asset Dashboard
+              ASSETS
             </span>
-            <span style={{ color: 'var(--text-muted)' }}>›</span>
+            <span style={{ color: 'var(--fleet-gray-light)' }}>›</span>
             <span className="topbar-breadcrumb-current mono">{assetId}</span>
           </>
         ) : (
@@ -49,8 +50,13 @@ export function TopBar() {
         )}
       </nav>
 
-      <div className="topbar-right" style={{ flex: 1, textAlign: 'right' }}>
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+      {/* Right — fleet live indicator */}
+      <div className="topbar-right">
+        <div className="topbar-live-indicator">
+          <span className="topbar-live-dot" />
+          Fleet Status · Live
+        </div>
+        <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--fleet-gray-mid)' }}>
           Workspace: Default
         </span>
       </div>

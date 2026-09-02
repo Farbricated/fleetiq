@@ -1,31 +1,30 @@
-import { NavLink, useLocation } from 'react-router-dom';
+﻿import { NavLink, useLocation } from 'react-router-dom';
 
 const NAV_SECTIONS = [
   {
     label: 'Overview',
     items: [
-      { path: '/', label: 'Fleet Command Center', icon: '⚡' },
-      { path: '/assets', label: 'Asset Dashboard', icon: '🏗' },
+      { path: '/',          label: 'Command Center',      icon: '⚡' },
+      { path: '/assets',    label: 'Assets',              icon: '🏗' },
     ],
   },
   {
     label: 'Intelligence',
     items: [
-      { path: '/alerts', label: 'Alerts', icon: '🔔' },
-      { path: '/utilization', label: 'Utilization Analytics', icon: '📊' },
-      { path: '/risk', label: 'Risk Dashboard', icon: '🛡' },
-      { path: '/forecasting', label: 'Demand Forecasting', icon: '🔮' },
+      { path: '/alerts',      label: 'Alerts',            icon: '🔔' },
+      { path: '/utilization', label: 'Utilization',       icon: '📊' },
+      { path: '/risk',        label: 'Risk',              icon: '🛡' },
+      { path: '/forecasting', label: 'Forecast',          icon: '🔮' },
     ],
   },
   {
     label: 'Operations',
     items: [
-      { path: '/candidates', label: 'Allocation Candidates', icon: '🎯' },
-      { path: '/recommendations', label: 'Recommendations', icon: '💡' },
-      { path: '/approvals', label: 'Approvals', icon: '✅' },
-      { path: '/rentals', label: 'Rental Workflow', icon: '📋' },
-      { path: '/actions', label: 'Action Status', icon: '⚙' },
-      { path: '/impact', label: 'Impact', icon: '📈' },
+      { path: '/candidates',     label: 'Allocation',     icon: '🎯' },
+      { path: '/recommendations',label: 'Actions',        icon: '💡' },
+      { path: '/approvals',      label: 'Approvals',      icon: '✅' },
+      { path: '/rentals',        label: 'Rentals',        icon: '📋' },
+      { path: '/impact',         label: 'Impact',         icon: '📈' },
     ],
   },
 ];
@@ -39,6 +38,7 @@ export function Sidebar({ apiOnline }: SidebarProps) {
 
   return (
     <aside className="sidebar" role="navigation" aria-label="Main navigation">
+      {/* Logo */}
       <div className="sidebar-logo">
         <div className="sidebar-logo-mark">
           <div className="sidebar-logo-icon">FQ</div>
@@ -49,6 +49,7 @@ export function Sidebar({ apiOnline }: SidebarProps) {
         </div>
       </div>
 
+      {/* Nav */}
       {NAV_SECTIONS.map((section) => (
         <div className="sidebar-section" key={section.label}>
           <div className="sidebar-section-label">{section.label}</div>
@@ -73,18 +74,19 @@ export function Sidebar({ apiOnline }: SidebarProps) {
         </div>
       ))}
 
+      {/* Footer */}
       <div className="sidebar-footer">
         <div className="sidebar-api-status">
           <span
             className="sidebar-status-dot"
-            style={{ background: apiOnline === false ? '#ef4444' : apiOnline === true ? '#00d4aa' : '#94a3b8' }}
+            style={{
+              background:
+                apiOnline === false ? '#DC2626'
+                : apiOnline === true  ? '#16A34A'
+                : '#6B7280',
+            }}
           />
-          API:{' '}
-          {apiOnline === null
-            ? 'Checking…'
-            : apiOnline
-            ? 'Connected'
-            : 'Offline'}
+          {apiOnline === null ? 'Connecting…' : apiOnline ? 'API Connected' : 'API Offline'}
         </div>
       </div>
     </aside>

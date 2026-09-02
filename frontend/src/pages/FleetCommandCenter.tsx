@@ -4,6 +4,7 @@ import { dashboardApi } from '../api/dashboard';
 import { assetsApi } from '../api/assets';
 import type { DashboardSummary, FleetAnalyticsSummary } from '../types';
 import { LoadingState, ErrorState } from '../components/ui/States';
+import { FLEET_HERO_IMAGE } from '../utils/machineImages';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
@@ -68,20 +69,46 @@ export function FleetCommandCenter() {
   ];
 
   const statusData = [
-    { name: 'Available', count: summary.available_assets, color: '#22c55e' },
-    { name: 'Rented', count: summary.rented_assets, color: '#0ea5e9' },
-    { name: 'Underutil.', count: fleet.underutilized_assets, color: '#f97316' },
-    { name: 'High Risk', count: fleet.high_risk_assets, color: '#ef4444' },
-    { name: 'Overdue', count: summary.overdue_assets, color: '#dc2626' },
+    { name: 'Available', count: summary.available_assets, color: '#16A34A' },
+    { name: 'Rented',    count: summary.rented_assets,    color: '#1D4ED8' },
+    { name: 'Underutil.', count: fleet.underutilized_assets, color: '#D97706' },
+    { name: 'High Risk', count: fleet.high_risk_assets,  color: '#DC2626' },
+    { name: 'Overdue',   count: summary.overdue_assets,  color: '#991B1B' },
   ];
 
   return (
-    <div>
-      <div className="page-header">
-        <h1 className="page-title">Fleet Command Center</h1>
-        <p className="page-subtitle">
-          Real-time overview of your entire fleet · {summary.total_assets} assets tracked
-        </p>
+    <div className="page-fade-in">
+
+      {/* Hero banner */}
+      <div style={{
+        position: 'relative', height: 180, borderRadius: 'var(--radius-md)',
+        overflow: 'hidden', marginBottom: 24,
+        background: 'var(--fleet-charcoal)',
+      }}>
+        <img
+          src={FLEET_HERO_IMAGE}
+          alt="Fleet operations"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.45 }}
+        />
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(90deg, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.5) 60%, transparent 100%)',
+          display: 'flex', flexDirection: 'column', justifyContent: 'center',
+          padding: '0 32px',
+        }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: '#fff', textTransform: 'uppercase', letterSpacing: 1, lineHeight: 1 }}>
+            Command Center
+          </div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: 6, fontWeight: 600 }}>
+            Fleet Operations · {summary.total_assets} Assets Tracked · Real-Time
+          </div>
+          <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#16A34A', display: 'inline-block', animation: 'pulse-live 2s infinite' }} />
+            <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: '#16A34A' }}>Live Data Feed Active</span>
+          </div>
+        </div>
+        {/* Yellow accent bar */}
+        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 5, background: 'var(--fleet-yellow)' }} />
       </div>
 
 
@@ -126,27 +153,28 @@ export function FleetCommandCenter() {
               <BarChart data={statusData} margin={{ left: -10 }}>
                 <XAxis
                   dataKey="name"
-                  tick={{ fill: '#94a3b8', fontSize: 11 }}
+                  tick={{ fill: '#6B7280', fontSize: 10, fontWeight: 600, fontFamily: 'Inter' }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis
-                  tick={{ fill: '#94a3b8', fontSize: 11 }}
+                  tick={{ fill: '#6B7280', fontSize: 10, fontFamily: 'Inter' }}
                   axisLine={false}
                   tickLine={false}
                   allowDecimals={false}
                 />
                 <Tooltip
                   contentStyle={{
-                    background: '#1a2235',
-                    border: '1px solid rgba(148,163,184,0.15)',
-                    borderRadius: 8,
-                    color: '#f1f5f9',
+                    background: '#1A1A1D',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: 4,
+                    color: '#F9FAFB',
                     fontSize: 12,
+                    fontFamily: 'Inter',
                   }}
-                  cursor={{ fill: 'rgba(148,163,184,0.05)' }}
+                  cursor={{ fill: 'rgba(255,205,17,0.05)' }}
                 />
-                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                <Bar dataKey="count" radius={[2, 2, 0, 0]}>
                   {statusData.map((entry) => (
                     <Cell key={entry.name} fill={entry.color} />
                   ))}

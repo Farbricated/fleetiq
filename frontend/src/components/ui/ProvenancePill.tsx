@@ -1,21 +1,21 @@
-import type { ProvenanceType } from '../../types';
+﻿import type { ProvenanceType } from '../../types';
 
 interface ProvenancePillProps {
   type: ProvenanceType;
 }
 
 const LABELS: Record<ProvenanceType, string> = {
-  'REAL': 'Real / Official',
-  'DERIVED': 'Derived',
-  'SIMULATED': 'Simulated',
-  'ILLUSTRATIVE ESTIMATE': 'Illustrative Est.',
+  'REAL':                  'Real / Official',
+  'DERIVED':               'Derived',
+  'SIMULATED':             'Simulated',
+  'ILLUSTRATIVE ESTIMATE': 'Illustrative',
 };
 
 export function ProvenancePill({ type }: ProvenancePillProps) {
   const cls = {
-    'REAL': 'provenance-real',
-    'DERIVED': 'provenance-derived',
-    'SIMULATED': 'provenance-simulated',
+    'REAL':                  'provenance-real',
+    'DERIVED':               'provenance-derived',
+    'SIMULATED':             'provenance-simulated',
     'ILLUSTRATIVE ESTIMATE': 'provenance-illustrative',
   }[type];
 
