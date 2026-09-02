@@ -75,8 +75,8 @@ export function CopilotWidget() {
         <div style={{
           width: 380,
           height: 500,
-          backgroundColor: 'var(--surface-sunken)',
-          border: '1px solid var(--border-subtle)',
+          backgroundColor: 'var(--fleet-bg-page)',
+          border: '1px solid var(--fleet-border)',
           borderRadius: 12,
           display: 'flex',
           flexDirection: 'column',
@@ -85,17 +85,17 @@ export function CopilotWidget() {
           {/* Header */}
           <div style={{
             padding: '16px',
-            borderBottom: '1px solid var(--border-subtle)',
+            borderBottom: '1px solid var(--fleet-border)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            backgroundColor: 'var(--surface-raised)',
+            backgroundColor: 'var(--fleet-charcoal)',
             borderTopLeftRadius: 12,
             borderTopRightRadius: 12
           }}>
             <div>
-              <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>FleetIQ Copilot</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Grounded AI Assistant</div>
+              <div style={{ fontWeight: 600, color: 'var(--fleet-yellow)' }}>FleetIQ Copilot</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>Grounded AI Assistant</div>
             </div>
             <button 
               onClick={() => setIsOpen(false)}
