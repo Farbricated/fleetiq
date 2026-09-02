@@ -1,12 +1,34 @@
 ﻿import { useEffect, useState, useCallback } from 'react';
 import { rentalsApi } from '../api/rentals';
-import { assetsApi } from '../api/assets';
-import type { RentalOrder, Asset } from '../types';
+import { equipmentApi } from '../api/assets';
+import type { RentalOrder, EquipmentCategory, EquipmentTypeEntry, EquipmentModelEntry } from '../types';
 import { LoadingState, EmptyState, ErrorState } from '../components/ui/States';
 import { ProvenancePill } from '../components/ui/ProvenancePill';
 
-// ─── helpers ─────────────────────────────────────────────────────────────────
+// ─── Category icons ────────────────────────────────────────────────────────────
+const CATEGORY_ICONS: Record<string, string> = {
+  'Earthmoving':                  '🏗️',
+  'Construction':                 '🧱',
+  'Lifting & Material Handling':  '🏋️',
+  'Compaction':                   '🛞',
+  'Paving':                       '🛣️',
+};
+const TYPE_ICONS: Record<string, string> = {
+  'Excavators':         '⛏️',
+  'Bulldozers':         '🚜',
+  'Motor Graders':      '🛤️',
+  'Wheel Loaders':      '🔃',
+  'Backhoe Loaders':    '🦺',
+  'Skid Steer Loaders': '🔩',
+  'Cranes':             '🏗️',
+  'Forklifts':          '⬆️',
+  'Soil Compactors':    '🔲',
+  'Asphalt Compactors': '⬛',
+  'Asphalt Pavers':     '🛣️',
+  'Cold Planers':       '❄️',
+};
 
+// ─── Status badge ──────────────────────────────────────────────────────────────
 function rentalStatusBadgeClass(status: string | null) {
   switch ((status ?? '').toUpperCase()) {
     case 'NEW':       return 'badge badge-rental-new';
@@ -17,44 +39,162 @@ function rentalStatusBadgeClass(status: string | null) {
   }
 }
 
+// ─── Stepper ──────────────────────────────────────────────────────────────────
 type StepState = 'pending' | 'active' | 'completed';
-
-interface StepperStepProps {
-  number: number;
-  label: string;
-  state: StepState;
-}
-function StepperStep({ number, label, state }: StepperStepProps) {
+function StepperStep({ number, label, state }: { number: number; label: string; state: StepState }) {
   return (
     <div className={`stepper-step ${state}`}>
-      <div className="stepper-circle">
-        {state === 'completed' ? '✓' : number}
-      </div>
+      <div className="stepper-circle">{state === 'completed' ? '✓' : number}</div>
       <span className="stepper-label">{label}</span>
     </div>
   );
 }
 
-// ─── main component ───────────────────────────────────────────────────────────
+// ─── Equipment Category Picker ────────────────────────────────────────────────
+interface PickerProps {
+  categories: EquipmentCategory[];
+  selectedAssetId: string;
+  onSelect: (assetId: string, meta: { category: string; type: string; model: string }) => void;
+  onClear: () => void;
+}
 
+function EquipmentPicker({ categories, selectedAssetId, onSelect, onClear }: PickerProps) {
+  const [selCat, setSelCat]   = useState<EquipmentCategory | null>(null);
+  const [selType, setSelType] = useState<EquipmentTypeEntry | null>(null);
+  const [selModel, setSelModel] = useState<EquipmentModelEntry | null>(null);
+
+  const reset = () => { setSelCat(null); setSelType(null); setSelModel(null); };
+
+  // If cleared externally, reset internal nav too
+  useEffect(() => { if (!selectedAssetId) reset(); }, [selectedAssetId]);
+
+  // ── Level 0: Category grid ──
+  if (!selCat) return (
+    <div className="eq-picker">
+      <div style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>
+        Select a machine category:
+      </div>
+      <div className="eq-category-grid">
+        {categories.map(cat => (
+          <div
+            key={cat.id}
+            className={`eq-category-card${selCat === cat ? ' selected' : ''}`}
+            onClick={() => setSelCat(cat)}
+          >
+            <span className={`eq-category-avail${cat.available_count === 0 ? ' zero' : ''}`}>
+              {cat.available_count} avail
+            </span>
+            <div className="eq-category-icon">{CATEGORY_ICONS[cat.name] ?? '🔧'}</div>
+            <div className="eq-category-name">{cat.name}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // ── Level 1: Type list ──
+  if (!selType) return (
+    <div className="eq-picker">
+      <div className="eq-breadcrumb">
+        <button className="eq-breadcrumb-back" onClick={() => setSelCat(null)}>← Categories</button>
+        <span className="eq-breadcrumb-sep">/</span>
+        <span className="eq-breadcrumb-item">{CATEGORY_ICONS[selCat.name] ?? '🔧'} {selCat.name}</span>
+      </div>
+      <div className="eq-type-list">
+        {selCat.types.map(t => {
+          const avail = t.models.reduce((s, m) => s + m.available_units, 0);
+          return (
+            <button key={t.id} className={`eq-type-btn${selType === t ? ' selected' : ''}`}
+              onClick={() => setSelType(t)}>
+              <span>{TYPE_ICONS[t.name] ?? '🔧'} {t.name}</span>
+              <span className={`eq-type-avail-chip${avail === 0 ? ' zero' : ''}`}>{avail} avail</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  // ── Level 2: Model + unit rows ──
+  return (
+    <div className="eq-picker">
+      <div className="eq-breadcrumb">
+        <button className="eq-breadcrumb-back" onClick={() => setSelCat(null)}>← Categories</button>
+        <span className="eq-breadcrumb-sep">/</span>
+        <button className="eq-breadcrumb-back" onClick={() => setSelType(null)}>
+          {selCat.name}
+        </button>
+        <span className="eq-breadcrumb-sep">/</span>
+        <span className="eq-breadcrumb-item">{selType.name}</span>
+      </div>
+      <div className="eq-model-list">
+        {selType.models.map(model => (
+          <div key={model.id} className="eq-model-card">
+            <div className="eq-model-header"
+              onClick={() => setSelModel(selModel?.id === model.id ? null : model)}>
+              <div>
+                <div className="eq-model-name">{model.model_name}</div>
+                <div className="eq-model-mfr">{model.manufacturer}</div>
+              </div>
+              <div className={`eq-model-avail${model.available_units > 0 ? ' has-avail' : ' no-avail'}`}>
+                {model.available_units > 0 ? `${model.available_units} unit(s) available` : 'None available'}
+                <span style={{ marginLeft: 6 }}>{selModel?.id === model.id ? '▲' : '▼'}</span>
+              </div>
+            </div>
+            {selModel?.id === model.id && model.assets.length > 0 && (
+              <div className="eq-asset-list">
+                {model.assets.map(asset => (
+                  <div key={asset.id}
+                    className={`eq-asset-row${selectedAssetId === asset.id ? ' selected' : ''}`}
+                    onClick={() => {
+                      onSelect(asset.id, {
+                        category: selCat.name,
+                        type: selType.name,
+                        model: model.model_name,
+                      });
+                    }}
+                  >
+                    <span className="eq-asset-id">{asset.id}</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span className="badge badge-rental-active" style={{ fontSize: 10 }}>AVAILABLE</span>
+                      {selectedAssetId === asset.id && <span className="eq-asset-check">✓</span>}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {selModel?.id === model.id && model.assets.length === 0 && (
+              <div style={{ padding: '10px 14px', fontSize: 12, color: 'var(--text-muted)' }}>
+                No available units for this model.
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ────────────────────────────────────────────────────────────
 export function RentalWorkflow() {
-  const [rentals, setRentals] = useState<RentalOrder[]>([]);
-  const [assets,  setAssets]  = useState<Asset[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState<string | null>(null);
+  const [rentals,    setRentals]    = useState<RentalOrder[]>([]);
+  const [categories, setCategories] = useState<EquipmentCategory[]>([]);
+  const [loading,    setLoading]    = useState(true);
+  const [error,      setError]      = useState<string | null>(null);
 
   // Stepper: 1=Create, 2=Assign, 3=Confirm
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   // Checkout state
-  const [checkoutRentalId,     setCheckoutRentalId]     = useState('');
-  const [checkoutAssetId,      setCheckoutAssetId]      = useState('');
-  const [checkoutDate,         setCheckoutDate]         = useState('');
-  const [returnDate,           setReturnDate]           = useState('');
-  const [checkoutMsg,          setCheckoutMsg]          = useState<string | null>(null);
-  const [checkoutOk,           setCheckoutOk]           = useState(false);
-  const [creatingOrder,        setCreatingOrder]        = useState(false);
-  const [submittingCheckout,   setSubmittingCheckout]   = useState(false);
+  const [checkoutRentalId,   setCheckoutRentalId]   = useState('');
+  const [checkoutAssetId,    setCheckoutAssetId]    = useState('');
+  const [checkoutAssetMeta,  setCheckoutAssetMeta]  = useState<{ category: string; type: string; model: string } | null>(null);
+  const [checkoutDate,       setCheckoutDate]       = useState('');
+  const [returnDate,         setReturnDate]         = useState('');
+  const [checkoutMsg,        setCheckoutMsg]        = useState<string | null>(null);
+  const [checkoutOk,         setCheckoutOk]         = useState(false);
+  const [creatingOrder,      setCreatingOrder]      = useState(false);
+  const [submittingCheckout, setSubmittingCheckout] = useState(false);
 
   // Checkin state
   const [checkinRentalId, setCheckinRentalId] = useState('');
@@ -65,8 +205,8 @@ export function RentalWorkflow() {
   const load = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const [r, a] = await Promise.all([rentalsApi.getAll(), assetsApi.getAll()]);
-      setRentals(r); setAssets(a);
+      const [r, cats] = await Promise.all([rentalsApi.getAll(), equipmentApi.getCategories()]);
+      setRentals(r); setCategories(cats);
     } catch (e) { setError((e as Error).message); }
     finally { setLoading(false); }
   }, []);
@@ -74,14 +214,12 @@ export function RentalWorkflow() {
   useEffect(() => { load(); }, [load]);
 
   // ── actions ──────────────────────────────────────────────────────────────
-
   const createRental = async () => {
     setCreatingOrder(true); setCheckoutMsg(null);
     try {
       const r = await rentalsApi.create();
       setCheckoutRentalId(r.id);
-      setStep(2);
-      load();
+      setStep(2); load();
     } catch (e) { setCheckoutMsg(`Error: ${(e as Error).message}`); }
     finally { setCreatingOrder(false); }
   };
@@ -96,11 +234,11 @@ export function RentalWorkflow() {
         expected_return_date: returnDate || undefined,
       });
       setCheckoutMsg(`Checkout successful — Item ID: ${res.rental_item_id}`);
-      setCheckoutOk(true);
-      load();
+      setCheckoutOk(true); load();
       setTimeout(() => {
         setStep(1); setCheckoutRentalId(''); setCheckoutAssetId('');
-        setCheckoutDate(''); setReturnDate(''); setCheckoutMsg(null); setCheckoutOk(false);
+        setCheckoutAssetMeta(null); setCheckoutDate(''); setReturnDate('');
+        setCheckoutMsg(null); setCheckoutOk(false);
       }, 3000);
     } catch (e) { setCheckoutMsg(`Error: ${(e as Error).message}`); setCheckoutOk(false); }
     finally { setSubmittingCheckout(false); }
@@ -112,26 +250,21 @@ export function RentalWorkflow() {
     try {
       await rentalsApi.checkin(checkinRentalId, { checkin_date: checkinDate });
       setCheckinMsg(`Check-in complete for ${checkinRentalId.substring(0, 16)}...`);
-      setCheckinOk(true); setCheckinRentalId(''); setCheckinDate('');
-      load();
+      setCheckinOk(true); setCheckinRentalId(''); setCheckinDate(''); load();
     } catch (e) { setCheckinMsg(`Error: ${(e as Error).message}`); setCheckinOk(false); }
   };
 
-  // ── derived counts ────────────────────────────────────────────────────────
-
+  // ── derived counts ─────────────────────────────────────────────────────────
   const totalRentals    = rentals.length;
   const activeRentals   = rentals.filter(r => r.status === 'ACTIVE').length;
   const newRentals      = rentals.filter(r => r.status === 'NEW').length;
   const returnedRentals = rentals.filter(r => r.status === 'RETURNED').length;
-  const availableAssets = assets.filter(a => a.status === 'AVAILABLE');
+  const totalAvail      = categories.reduce((s, c) => s + c.available_count, 0);
 
   const stepState = (n: number): StepState =>
     n < step ? 'completed' : n === step ? 'active' : 'pending';
 
-  const selectedAsset = assets.find(a => a.id === checkoutAssetId);
-
-  // ── render ────────────────────────────────────────────────────────────────
-
+  // ── render ─────────────────────────────────────────────────────────────────
   return (
     <div className="page-fade-in">
 
@@ -177,7 +310,7 @@ export function RentalWorkflow() {
         <div className="rental-stat-tile">
           <div className="rental-stat-icon blue">🚜</div>
           <div className="rental-stat-body">
-            <div className="rental-stat-value">{availableAssets.length}</div>
+            <div className="rental-stat-value">{totalAvail}</div>
             <div className="rental-stat-label">Available Assets</div>
           </div>
         </div>
@@ -186,7 +319,7 @@ export function RentalWorkflow() {
       {/* Workflow grid */}
       <div className="workflow-grid">
 
-        {/* Checkout Stepper */}
+        {/* ── Checkout Stepper ────────────────────────────────────── */}
         <div className="card">
           <div className="card-header">
             <div>
@@ -199,24 +332,21 @@ export function RentalWorkflow() {
           <div className="stepper-container">
             <div className="stepper-track">
               <StepperStep number={1} label="Create Order" state={stepState(1)} />
-              <StepperStep number={2} label="Assign Asset"  state={stepState(2)} />
+              <StepperStep number={2} label="Select Machine" state={stepState(2)} />
               <StepperStep number={3} label="Confirm"       state={stepState(3)} />
             </div>
 
+            {/* Step 1: Create order */}
             {step === 1 && (
               <div className="stepper-panel" key="step1">
                 <div className="step-action-hero">
                   <div className="step-action-icon">📋</div>
                   <div className="step-action-title">Create a Rental Order</div>
                   <div className="step-action-subtitle">
-                    Start by generating a new rental order. A unique ID will be assigned automatically.
+                    Generate a new rental order. A unique ID will be assigned automatically.
                   </div>
-                  <button
-                    className="btn btn-primary btn-lg"
-                    id="create-rental-btn"
-                    onClick={createRental}
-                    disabled={creatingOrder}
-                  >
+                  <button className="btn btn-primary btn-lg" id="create-rental-btn"
+                    onClick={createRental} disabled={creatingOrder}>
                     {creatingOrder ? '⏳ Creating...' : '+ Create New Rental Order'}
                   </button>
                   {checkoutMsg && (
@@ -228,9 +358,11 @@ export function RentalWorkflow() {
               </div>
             )}
 
+            {/* Step 2: Select machine from hierarchy */}
             {step === 2 && (
               <div className="stepper-panel" key="step2">
                 <div className="workflow-form">
+                  {/* Rental ID pill */}
                   <div>
                     <div className="form-label">📋 Rental Order ID</div>
                     <div className="rental-id-pill">
@@ -238,35 +370,53 @@ export function RentalWorkflow() {
                       {checkoutRentalId}
                     </div>
                   </div>
-                  <div className="form-group">
-                    <label className="form-label" htmlFor="checkout-asset-id">🚜 Asset to Assign</label>
-                    <select
-                      id="checkout-asset-id"
-                      className="form-select"
-                      value={checkoutAssetId}
-                      onChange={(e) => setCheckoutAssetId(e.target.value)}
-                    >
-                      <option value="">— Select available asset —</option>
-                      {availableAssets.map(a => (
-                        <option key={a.id} value={a.id}>{a.id} · {a.model_id ?? 'Unknown Model'}</option>
-                      ))}
-                    </select>
-                    <span className="form-helper">{availableAssets.length} asset(s) available</span>
-                  </div>
+
+                  {/* Selected asset summary / picker */}
+                  {checkoutAssetId && checkoutAssetMeta ? (
+                    <div>
+                      <div className="form-label" style={{ marginBottom: 6 }}>✅ Selected Machine</div>
+                      <div className="eq-selected-summary">
+                        <div>
+                          <div className="eq-selected-summary-label">
+                            {checkoutAssetMeta.category} → {checkoutAssetMeta.type}
+                          </div>
+                          <div>{checkoutAssetMeta.model} · <span className="mono" style={{ fontSize: 11 }}>{checkoutAssetId}</span></div>
+                        </div>
+                        <button className="eq-clear-btn" onClick={() => { setCheckoutAssetId(''); setCheckoutAssetMeta(null); }}>
+                          ✕ Change
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="form-label" style={{ marginBottom: 6 }}>🚜 Select Machine</div>
+                      {loading ? <LoadingState /> : (
+                        <EquipmentPicker
+                          categories={categories}
+                          selectedAssetId={checkoutAssetId}
+                          onSelect={(id, meta) => { setCheckoutAssetId(id); setCheckoutAssetMeta(meta); }}
+                          onClear={() => { setCheckoutAssetId(''); setCheckoutAssetMeta(null); }}
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  {/* Dates */}
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                     <div className="form-group">
                       <label className="form-label" htmlFor="checkout-date">📅 Checkout Date</label>
                       <input id="checkout-date" type="date" className="form-input"
-                        value={checkoutDate} onChange={(e) => setCheckoutDate(e.target.value)} />
+                        value={checkoutDate} onChange={e => setCheckoutDate(e.target.value)} />
                     </div>
                     <div className="form-group">
                       <label className="form-label" htmlFor="return-date">
                         📅 Expected Return <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>(optional)</span>
                       </label>
                       <input id="return-date" type="date" className="form-input"
-                        value={returnDate} onChange={(e) => setReturnDate(e.target.value)} />
+                        value={returnDate} onChange={e => setReturnDate(e.target.value)} />
                     </div>
                   </div>
+
                   <div className="step-nav">
                     <button className="btn btn-secondary btn-sm" onClick={() => setStep(1)}>← Back</button>
                     <button className="btn btn-primary"
@@ -279,27 +429,38 @@ export function RentalWorkflow() {
               </div>
             )}
 
+            {/* Step 3: Confirm */}
             {step === 3 && (
               <div className="stepper-panel" key="step3">
                 <div className="workflow-form">
                   <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>
-                    Review the checkout details before submitting:
+                    Review checkout details before submitting:
                   </div>
                   <div className="confirm-summary">
                     <div className="confirm-row">
                       <span className="confirm-row-label">Rental Order ID</span>
-                      <span className="confirm-row-value">{checkoutRentalId.substring(0, 24)}...</span>
+                      <span className="confirm-row-value mono" style={{ fontSize: 11 }}>{checkoutRentalId.substring(0, 24)}...</span>
                     </div>
-                    <div className="confirm-row">
-                      <span className="confirm-row-label">Asset</span>
-                      <span className="confirm-row-value">{selectedAsset?.id ?? checkoutAssetId}</span>
-                    </div>
-                    {selectedAsset?.model_id && (
-                      <div className="confirm-row">
-                        <span className="confirm-row-label">Model</span>
-                        <span className="confirm-row-value">{selectedAsset.model_id}</span>
-                      </div>
+                    {checkoutAssetMeta && (
+                      <>
+                        <div className="confirm-row">
+                          <span className="confirm-row-label">Category</span>
+                          <span className="confirm-row-value">{checkoutAssetMeta.category}</span>
+                        </div>
+                        <div className="confirm-row">
+                          <span className="confirm-row-label">Machine Type</span>
+                          <span className="confirm-row-value">{checkoutAssetMeta.type}</span>
+                        </div>
+                        <div className="confirm-row">
+                          <span className="confirm-row-label">Model</span>
+                          <span className="confirm-row-value">{checkoutAssetMeta.model}</span>
+                        </div>
+                      </>
                     )}
+                    <div className="confirm-row">
+                      <span className="confirm-row-label">Unit ID</span>
+                      <span className="confirm-row-value mono" style={{ fontSize: 11 }}>{checkoutAssetId}</span>
+                    </div>
                     <div className="confirm-row">
                       <span className="confirm-row-label">Checkout Date</span>
                       <span className="confirm-row-value">{checkoutDate}</span>
@@ -328,7 +489,7 @@ export function RentalWorkflow() {
           </div>
         </div>
 
-        {/* Check-In Card */}
+        {/* ── Check-In Card ─────────────────────────────────────────── */}
         <div className="card">
           <div className="card-header">
             <div>
@@ -342,7 +503,7 @@ export function RentalWorkflow() {
               <div className="form-group">
                 <label className="form-label" htmlFor="checkin-rental-id">🔑 Active Rental</label>
                 <select id="checkin-rental-id" className="form-select"
-                  value={checkinRentalId} onChange={(e) => setCheckinRentalId(e.target.value)}>
+                  value={checkinRentalId} onChange={e => setCheckinRentalId(e.target.value)}>
                   <option value="">— Select rental to return —</option>
                   {rentals.filter(r => r.status === 'NEW' || r.status === 'ACTIVE').map(r => (
                     <option key={r.id} value={r.id}>
@@ -357,7 +518,7 @@ export function RentalWorkflow() {
               <div className="form-group">
                 <label className="form-label" htmlFor="checkin-date">📅 Check-In Date</label>
                 <input id="checkin-date" type="date" className="form-input"
-                  value={checkinDate} onChange={(e) => setCheckinDate(e.target.value)} />
+                  value={checkinDate} onChange={e => setCheckinDate(e.target.value)} />
               </div>
               <button className="btn btn-primary" id="checkin-btn"
                 disabled={!checkinRentalId || !checkinDate} onClick={doCheckin}>
@@ -416,15 +577,13 @@ export function RentalWorkflow() {
                   </tr>
                 </thead>
                 <tbody>
-                  {rentals.map((r) => (
+                  {rentals.map(r => (
                     <tr key={r.id}>
                       <td className="mono" style={{ fontSize: 11 }}>{r.id}</td>
                       <td className="text-muted">{r.customer_id ?? '—'}</td>
                       <td>{r.site_id ?? '—'}</td>
                       <td>
-                        <span className={rentalStatusBadgeClass(r.status)}>
-                          {r.status ?? '—'}
-                        </span>
+                        <span className={rentalStatusBadgeClass(r.status)}>{r.status ?? '—'}</span>
                       </td>
                     </tr>
                   ))}

@@ -7,8 +7,9 @@ from datetime import date, datetime
 
 from app.core.database import get_db
 from app.models.all import (
-    Asset, Site, Operator, RentalOrder, RentalItem, Telemetry, UsageDaily, Event, Alert, 
-    Forecast, Recommendation, AssetOperatorAssignment, ModelRun
+    Asset, Site, Operator, RentalOrder, RentalItem, Telemetry, UsageDaily, Event, Alert,
+    Forecast, Recommendation, AssetOperatorAssignment, ModelRun,
+    EquipmentCategory, EquipmentType, EquipmentModel
 )
 from app.schemas.all import *
 from app.services.analytics import analyze_asset_utilization, analyze_asset_risk, register_model_run
@@ -23,6 +24,47 @@ def log_event(db: Session, asset_id: str, event_type: str):
 @router.get("/health")
 def health_check():
     return {"status": "ok"}
+
+@router.get("/equipment/categories")
+def get_equipment_categories(db: Session = Depends(get_db)):
+    """Return full CAT equipment hierarchy: Category > Type > Model with per-asset availability."""
+    categories = db.query(EquipmentCategory).all()
+    result = []
+    for cat in categories:
+        types = db.query(EquipmentType).filter(EquipmentType.category_id == cat.id).all()
+        types_data = []
+        for eq_type in types:
+            models = db.query(EquipmentModel).filter(EquipmentModel.type_id == eq_type.id).all()
+            models_data = []
+            for model in models:
+                # Find assets linked to this model
+                assets = db.query(Asset).filter(Asset.model_id == model.id).all()
+                available = [a for a in assets if a.status == 'AVAILABLE']
+                models_data.append({
+                    'id': str(model.id),
+                    'model_name': model.model_name,
+                    'manufacturer': model.manufacturer,
+                    'total_units': len(assets),
+                    'available_units': len(available),
+                    'assets': [{'id': a.id, 'status': a.status} for a in available],
+                })
+            # Only include types that have at least one model with assets
+            if any(m['total_units'] > 0 for m in models_data):
+                types_data.append({
+                    'id': str(eq_type.id),
+                    'name': eq_type.name,
+                    'models': models_data,
+                })
+        result.append({
+            'id': str(cat.id),
+            'name': cat.name,
+            'types': types_data,
+            'available_count': sum(
+                m['available_units']
+                for t in types_data for m in t['models']
+            ),
+        })
+    return result
 
 @router.get("/dashboard/summary", response_model=DashboardSummary)
 def get_dashboard_summary(db: Session = Depends(get_db)):

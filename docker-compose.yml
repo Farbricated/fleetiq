@@ -27,6 +27,8 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-fleetiq_user}:${POSTGRES_PASSWORD:-fleetiq_password}@db:5432/${POSTGRES_DB:-fleetiq}
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend:/app
     depends_on:
       db:
         condition: service_healthy

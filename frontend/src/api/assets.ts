@@ -2,7 +2,7 @@ import { api } from './client';
 import type {
   Asset, UsageDaily, Telemetry, Event,
   AnalyticsResult, RiskResult,
-  Operator, Site,
+  Operator, Site, EquipmentCategory,
 } from '../types';
 
 export const assetsApi = {
@@ -28,4 +28,8 @@ export const operatorsApi = {
 export const sitesApi = {
   getAll: () => api.get<Site[]>('/sites'),
   getById: (id: string) => api.get<Site>(`/sites/${id}`),
+};
+
+export const equipmentApi = {
+  getCategories: () => api.get<EquipmentCategory[]>('/equipment/categories'),
 };

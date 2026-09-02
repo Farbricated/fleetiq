@@ -184,6 +184,34 @@ export interface ImpactRecord {
   provenance: 'ILLUSTRATIVE ESTIMATE';
 }
 
+// ─── Equipment Hierarchy ───
+export interface EquipmentAsset {
+  id: string;
+  status: string;
+}
+
+export interface EquipmentModelEntry {
+  id: string;
+  model_name: string;
+  manufacturer: string;
+  total_units: number;
+  available_units: number;
+  assets: EquipmentAsset[];
+}
+
+export interface EquipmentTypeEntry {
+  id: string;
+  name: string;
+  models: EquipmentModelEntry[];
+}
+
+export interface EquipmentCategory {
+  id: string;
+  name: string;
+  types: EquipmentTypeEntry[];
+  available_count: number;
+}
+
 // ─── UI helpers ───
 export type SeverityLevel = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
 export type ProvenanceType = 'REAL' | 'DERIVED' | 'SIMULATED' | 'ILLUSTRATIVE ESTIMATE';
