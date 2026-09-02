@@ -276,13 +276,14 @@ def generate_and_ingest():
     for aid in synth_assets:
         if random.random() < 0.1: # 10% of assets have an alert
             alert = Alert(
-                asset_id=aid,
-                type=random.choice(["PREDICTIVE_MAINTENANCE", "ANOMALY", "THRESHOLD_BREACH"]),
-                severity=random.choice(["CRITICAL", "HIGH", "MEDIUM"]),
-                status="ACTIVE",
-                created_at=datetime.utcnow() - timedelta(hours=random.randint(1, 48)),
-                reason=random.choice(["Engine Temperature Critical", "Vibration Anomaly", "Low Fuel Threshold", "Hydraulic Pressure Drop"])
-            )
+            id=str(uuid.uuid4()),
+            asset_id=aid,
+            type=random.choice(["PREDICTIVE_MAINTENANCE", "CRITICAL_FAILURE", "OPERATIONAL_ANOMALY"]),
+            severity=random.choice(["HIGH", "CRITICAL"]),
+            reason=random.choice(["High Engine Temp", "Hydraulic Pressure Drop", "Vibration Anomaly", "Excessive Idle Time", "Geofence Violation"]),
+            status="ACTIVE",
+            created_at=datetime.utcnow() - timedelta(hours=random.randint(1, 48))
+        )
             db.add(alert)
     db.commit()
 
@@ -351,7 +352,7 @@ def generate_and_ingest():
             selected_candidate_id=cand.id,
             action_type=random.choice(["REALLOCATE", "RENT", "MAINTENANCE"]),
             confidence=0.95,
-            status="APPROVED"
+            status="EXECUTED"
         )
         db.add(rec)
         db.commit()
@@ -377,6 +378,23 @@ def generate_and_ingest():
         db.add(impact)
         db.commit()
 
+    # Generate Overdue Rentals
+    print("Generating Overdue Rentals...")
+    ro = RentalOrder(id=uuid.uuid4(), site_id="S001", status="ACTIVE")
+    db.add(ro)
+    db.commit()
+    for i in range(10):
+        ri = RentalItem(
+            id=uuid.uuid4(),
+            rental_order_id=ro.id,
+            asset_id=random.choice(synth_assets),
+            status="ACTIVE",
+            checkout_date=date.today() - timedelta(days=10),
+            checkin_date=date.today() - timedelta(days=2),
+            daily_rate=150.0
+        )
+        db.add(ri)
+    db.commit()
 
     print("Validating constraints...")
     assert db.query(Asset).filter_by(id="EQX1007").first() is not None, "EQX1007 missing!"

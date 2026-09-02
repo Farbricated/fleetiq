@@ -39,11 +39,23 @@ def get_fleet_summary_context(db: Session) -> dict:
     rented = db.query(Asset).filter(Asset.status == "RENTED").count()
     active_alerts = db.query(Alert).filter(Alert.status == "ACTIVE").count()
     
+    top_alerts = db.query(Alert).filter(Alert.status == "ACTIVE").order_by(Alert.created_at.desc()).limit(5).all()
+    
+    # Import locally to avoid circular imports if needed, or just use the models
+    from app.models.all import ImpactRecord
+    recent_impacts = db.query(ImpactRecord).order_by(ImpactRecord.id.desc()).limit(5).all()
+    
     return {
         "fleet_summary": {
             "total_assets": total_assets,
             "rented_assets": rented,
             "available_assets": total_assets - rented,
-            "active_alerts": active_alerts
-        }
+            "total_active_alerts": active_alerts
+        },
+        "top_active_alerts": [
+            {"asset_id": a.asset_id, "type": a.type, "severity": a.severity, "reason": a.reason} for a in top_alerts
+        ],
+        "recent_financial_impacts": [
+            {"metric": i.metric, "estimated_value": i.estimated_value, "actual_value": i.actual_value} for i in recent_impacts
+        ]
     }

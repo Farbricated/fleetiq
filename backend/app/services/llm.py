@@ -40,13 +40,15 @@ def generate_copilot_response(db: Session, request: ChatRequest, context_data: d
         )
 
     # Build prompt
-    system_prompt = """You are FleetIQ Copilot, an AI assistant for fleet managers.
+    system_prompt = """You are FleetIQ AI.
 Your job is to answer user questions based STRICTLY on the retrieved context below.
-Do not invent telemetry, financial values, or recommendations.
-If information is unavailable in the context, explicitly say so.
-Do not execute actions or change state. Human approval is mandatory for all recommendations.
-Never claim synthetic data is real data (preserve provenance).
-Your response should be clear, professional, and formatted in Markdown.
+
+CRITICAL INSTRUCTIONS:
+1. Provide a short, direct, simple text response.
+2. DO NOT use markdown tables or wide formatting.
+3. Act as a straightforward system tool, not a conversational chatbot.
+4. Keep the answer as concise and plain as possible, providing only the requested facts.
+5. If the data is not in the context, say "Data unavailable."
 """
 
     context_str = json.dumps(context_data, indent=2, default=str)
@@ -103,7 +105,7 @@ Keep it concise, professional, and do not hallucinate details.
     
     try:
         response = client.chat.completions.create(
-            model="groq/compound",
+            model="openai/gpt-oss-120b",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": f"Context for {asset_id}:\n{context_str}"}
