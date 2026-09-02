@@ -179,15 +179,15 @@ def generate_and_ingest():
     # --- 5. SYNTHETIC EXTENSION (ASSETS & TIME SERIES) ---
     print("Generating Synthetic Assets and History...")
     synth_assets = []
-    # Generate 20 synthetic assets
-    for i in range(20):
+    # Generate 100 synthetic assets
+    for i in range(100):
         aid = f"EQX20{i:02d}"
         t_name = random.choice(list(types_def.keys()))
         m_name = random.choice(models_def[t_name])
         asset = db.query(Asset).filter_by(id=aid).first()
         if not asset:
             # Randomize status
-            status = random.choices(["AVAILABLE", "RENTED", "MAINTENANCE"], weights=[40, 50, 10])[0]
+            status = random.choices(["AVAILABLE", "RENTED", "MAINTENANCE", "IN_TRANSIT"], weights=[30, 50, 15, 5])[0]
             asset = Asset(id=aid, model_id=model_objs[m_name].id, status=status)
             db.add(asset)
             db.commit()
@@ -255,13 +255,120 @@ def generate_and_ingest():
                     equipment_type_id=type_objs[t_name].id,
                     equipment_type_name=t_name,
                     forecast_date=today,
-                    predicted_quantity=random.randint(1, 5),
+                    predicted_quantity=random.randint(2, 8),
                     provenance="SIMULATED",
                     method="WMA",
-                    demand_gap=random.randint(1, 3)
+                    demand_gap=random.randint(1, 5)
                 )
                 db.add(f)
     db.commit()
+
+    print("Generating Alerts, Recommendations, and Impacts...")
+    # Generate Alerts
+    for aid in synth_assets:
+        if random.random() < 0.1: # 10% of assets have an alert
+            alert = Alert(
+                asset_id=aid,
+                type=random.choice(["PREDICTIVE_MAINTENANCE", "ANOMALY", "THRESHOLD_BREACH"]),
+                severity=random.choice(["CRITICAL", "HIGH", "MEDIUM"]),
+                status="ACTIVE",
+                created_at=datetime.utcnow() - timedelta(hours=random.randint(1, 48)),
+                reason=random.choice(["Engine Temperature Critical", "Vibration Anomaly", "Low Fuel Threshold", "Hydraulic Pressure Drop"])
+            )
+            db.add(alert)
+    db.commit()
+
+    # Generate Recommendations and Candidates
+    for i in range(15): # 15 pending recommendations
+        rec_id = str(uuid.uuid4())
+        cand_id = str(uuid.uuid4())
+        
+        # We need a dummy forecast to link candidate to
+        s_id = random.choice(list(site_names.keys()))
+        t_name = random.choice(list(types_def.keys()))
+        f_id = str(uuid.uuid4())
+        f = Forecast(
+            id=f_id,
+            site_id=s_id,
+            equipment_type_name=t_name,
+            forecast_date=datetime.utcnow().date(),
+            predicted_quantity=random.randint(1, 5),
+            provenance="SIMULATED",
+            method="WMA",
+            demand_gap=random.randint(1, 3)
+        )
+        db.add(f)
+        db.commit()
+
+        # Generate candidates linked to forecast
+        cand_aid = random.choice(synth_assets)
+        cand = AllocationCandidate(
+            id=cand_id,
+            forecast_id=f.id,
+            asset_id=cand_aid,
+            score=round(random.uniform(0.6, 0.99), 2),
+            reasoning={"target_site_id": s_id, "explanation": "Optimal ML match"}
+        )
+        db.add(cand)
+        db.commit()
+
+        rec = Recommendation(
+            id=rec_id,
+            selected_candidate_id=cand.id,
+            action_type=random.choice(["REALLOCATE", "RENT", "MAINTENANCE"]),
+            confidence=round(random.uniform(0.6, 0.99), 2),
+            status="PENDING"
+        )
+        db.add(rec)
+        db.commit()
+
+    # Generate completed actions & impacts
+    for i in range(30):
+        action_id = str(uuid.uuid4())
+        rec_id = str(uuid.uuid4())
+        cand_id = str(uuid.uuid4())
+        
+        cand = AllocationCandidate(
+            id=cand_id,
+            forecast_id=f.id,
+            asset_id=random.choice(synth_assets),
+            score=round(random.uniform(0.6, 0.99), 2),
+            reasoning={"target_site_id": s_id, "explanation": "Historical fallback"}
+        )
+        db.add(cand)
+        db.commit()
+        
+        rec = Recommendation(
+            id=rec_id,
+            selected_candidate_id=cand.id,
+            action_type=random.choice(["REALLOCATE", "RENT", "MAINTENANCE"]),
+            confidence=0.95,
+            status="APPROVED"
+        )
+        db.add(rec)
+        db.commit()
+        
+        action = RecommendationAction(
+            id=action_id,
+            recommendation_id=rec_id,
+            action="DISPATCH",
+            new_status="COMPLETED",
+            notes="Executed by ML pipeline.",
+            timestamp=datetime.utcnow() - timedelta(days=random.randint(1, 20))
+        )
+        db.add(action)
+        db.commit()
+        
+        impact = ImpactRecord(
+            action_id=action_id,
+            metric=random.choice(["ROI_USD", "Downtime_Prevented_Hours", "Carbon_Savings_kg"]),
+            estimated_value=round(random.uniform(100.0, 5000.0), 2),
+            actual_value=round(random.uniform(100.0, 5000.0), 2),
+            is_illustrative=True
+        )
+        db.add(impact)
+        db.commit()
+
 
     print("Validating constraints...")
     assert db.query(Asset).filter_by(id="EQX1007").first() is not None, "EQX1007 missing!"

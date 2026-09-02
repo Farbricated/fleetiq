@@ -55,7 +55,7 @@ Your response should be clear, professional, and formatted in Markdown.
 
     try:
         response = client.chat.completions.create(
-            model="llama3-8b-8192",
+            model="openai/gpt-oss-120b",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
@@ -71,7 +71,7 @@ Your response should be clear, professional, and formatted in Markdown.
         return ChatResponse(
             answer=answer,
             sources=sources,
-            model="llama3-8b-8192",
+            model="openai/gpt-oss-120b",
             grounded=True
         )
     except Exception as e:
@@ -115,7 +115,7 @@ Keep it concise, professional, and do not hallucinate details.
         return ChatResponse(
             answer=answer,
             sources=list(context_data.keys()),
-            model="llama3-8b-8192",
+            model="openai/gpt-oss-120b",
             grounded=True
         )
     except Exception as e:
