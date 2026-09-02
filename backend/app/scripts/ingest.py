@@ -42,11 +42,21 @@ def run_ingestion():
                 
         db.commit()
 
-        # 5. Insert Asset
+        # 5. Insert Asset — derive realistic status from data
         asset_id = str(row['Equipment ID'])
         asset = db.query(Asset).filter(Asset.id == asset_id).first()
         if not asset:
-            asset = Asset(id=asset_id, status="RENTED")
+            # No site + zero engine hours = clearly idle/available
+            engine_h = float(row['Engine Hours/Day']) if pd.notna(row['Engine Hours/Day']) else 0
+            has_site = site_id is not None
+            if not has_site and engine_h == 0:
+                derived_status = 'AVAILABLE'
+            elif engine_h >= 6:
+                # High utilization assets have been returned and are ready
+                derived_status = 'AVAILABLE'
+            else:
+                derived_status = 'RENTED'
+            asset = Asset(id=asset_id, status=derived_status)
             db.add(asset)
             db.commit()
             
